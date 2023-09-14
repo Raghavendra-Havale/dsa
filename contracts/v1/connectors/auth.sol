@@ -1,4 +1,4 @@
-pragma solidity ^0.7.0;
+pragma solidity ^0.8.0;
 
 /**
  * @title ConnectAuth.
@@ -18,11 +18,11 @@ interface EventInterface {
 contract Basics {
 
     /**
-     * @dev InstaEvent Address.
+     * @dev LayerEvent Address.
      */
-    address public immutable instaEventAddress;
-    constructor (address _instaEventAddress) {
-        instaEventAddress = _instaEventAddress;
+    address public immutable layerEventAddress;
+    constructor (address _layerEventAddress) {
+        layerEventAddress = _layerEventAddress;
     }
 
      /**
@@ -37,7 +37,7 @@ contract Basics {
 
 contract Auth is Basics {
 
-    constructor (address _instaEventAddress) Basics(_instaEventAddress) {}
+    constructor (address _layerEventAddress) Basics(_layerEventAddress) {}
 
     event LogAddAuth(address indexed _msgSender, address indexed _auth);
     event LogRemoveAuth(address indexed _msgSender, address indexed _auth);
@@ -54,7 +54,7 @@ contract Auth is Basics {
         bytes32 _eventCode = keccak256("LogAddAuth(address,address)");
         bytes memory _eventParam = abi.encode(msg.sender, user);
         (uint _type, uint _id) = connectorID();
-        EventInterface(instaEventAddress).emitEvent(_type, _id, _eventCode, _eventParam);
+        EventInterface(layerEventAddress).emitEvent(_type, _id, _eventCode, _eventParam);
     }
 
     /**
@@ -69,7 +69,7 @@ contract Auth is Basics {
         bytes32 _eventCode = keccak256("LogRemoveAuth(address,address)");
         bytes memory _eventParam = abi.encode(msg.sender, user);
         (uint _type, uint _id) = connectorID();
-        EventInterface(instaEventAddress).emitEvent(_type, _id, _eventCode, _eventParam);
+        EventInterface(layerEventAddress).emitEvent(_type, _id, _eventCode, _eventParam);
     }
 
 }
@@ -77,6 +77,6 @@ contract Auth is Basics {
 
 contract ConnectAuth is Auth {
 
-    constructor (address _instaEventAddress) public Auth(_instaEventAddress) {}
+    constructor (address _layerEventAddress) public Auth(_layerEventAddress) {}
     string constant public name = "Auth-v1";
 }

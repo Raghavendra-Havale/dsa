@@ -1,8 +1,16 @@
-pragma solidity ^0.7.0;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 
+/**
+ * @title Variables
+ * @dev This contract manages the authorization and beta mode settings for the platform.
+ */
 contract Variables {
-    // Auth Module(Address of Auth => bool).
+    
+    /// @dev Mapping of address to boolean indicating authorization status.
     mapping (address => bool) internal _auth;
-    // enable beta mode to access all the beta features.
+    
+
+    /// @dev Boolean flag to enable or disable beta features.
     bool internal _beta;
 }

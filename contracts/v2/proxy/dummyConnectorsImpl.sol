@@ -1,5 +1,10 @@
-pragma solidity ^0.7.0;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 
-contract InstaConnectorsV2Impl  {
+/**
+ * @title LayerConnectorsV2Impl
+ * @dev This contract serves as the implementation for the LayerConnectorsV2. 
+ */
+contract LayerConnectorsV2Impl  {
 
 }

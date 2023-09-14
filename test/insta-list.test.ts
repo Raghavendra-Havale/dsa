@@ -5,22 +5,22 @@ const { web3, deployments, waffle } = hre;
 const { provider, deployContract } = waffle;
 
 import expectEvent from "../scripts/expectEvent";
-import instaDeployContract from "../scripts/deployContract";
+import layerDeployContract from "../scripts/deployContract";
 
 import { Contract, Signer } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { Address } from "hardhat-deploy/dist/types";
 import BigNumber from "bignumber.js";
 
-describe("InstaList", function () {
+describe("LayerList", function () {
   const addr_zero = ethers.constants.AddressZero;
 
-  let instaIndex: Contract,
-    instaList: Contract,
-    instaConnectors: Contract,
-    instaAccount: Contract,
-    instaDefaultAccountV2: Contract,
-    instaConnectorsV2: Contract;
+  let layerIndex: Contract,
+    layerList: Contract,
+    layerConnectors: Contract,
+    layerAccount: Contract,
+    layerDefaultAccountV2: Contract,
+    layerConnectorsV2: Contract;
 
   let masterSigner: Signer;
   let dsaV1: any;
@@ -59,32 +59,32 @@ describe("InstaList", function () {
 
     console.log(`\tDeployer Address: ${deployerAddress}`);
 
-    instaIndex = await instaDeployContract("InstaIndex", []);
+    layerIndex = await layerDeployContract("LayerIndex", []);
 
-    instaList = await instaDeployContract("InstaList", [instaIndex.address]);
+    layerList = await layerDeployContract("LayerList", [layerIndex.address]);
 
-    instaAccount = await instaDeployContract("InstaAccount", [
-      instaIndex.address,
+    layerAccount = await layerDeployContract("LayerAccount", [
+      layerIndex.address,
     ]);
 
-    instaConnectors = await instaDeployContract("InstaConnectors", [
-      instaIndex.address,
+    layerConnectors = await layerDeployContract("LayerConnectors", [
+      layerIndex.address,
     ]);
 
-    instaConnectorsV2 = await instaDeployContract("InstaConnectorsV2", [
-      instaIndex.address,
+    layerConnectorsV2 = await layerDeployContract("LayerConnectorsV2", [
+      layerIndex.address,
     ]);
 
-    instaDefaultAccountV2 = await instaDeployContract(
-      "InstaDefaultImplementation",
-      [instaIndex.address]
+    layerDefaultAccountV2 = await layerDeployContract(
+      "LayerDefaultImplementation",
+      [layerIndex.address]
     );
 
     setBasicsArgs = [
       deployerAddress,
-      instaList.address,
-      instaAccount.address,
-      instaConnectors.address,
+      layerList.address,
+      layerAccount.address,
+      layerConnectors.address,
     ];
 
     await hre.network.provider.request({
@@ -96,27 +96,27 @@ describe("InstaList", function () {
   });
 
   it("should have the contracts deployed", async function () {
-    expect(!!instaIndex.address).to.be.true;
-    expect(!!instaList.address).to.be.true;
-    expect(!!instaAccount.address).to.be.true;
-    expect(!!instaConnectors.address).to.be.true;
+    expect(!!layerIndex.address).to.be.true;
+    expect(!!layerList.address).to.be.true;
+    expect(!!layerAccount.address).to.be.true;
+    expect(!!layerConnectors.address).to.be.true;
   });
 
   it("should set the basics", async function () {
-    const tx = await instaIndex.setBasics(...setBasicsArgs);
+    const tx = await layerIndex.setBasics(...setBasicsArgs);
     const txDetails = await tx.wait();
     expect(!!txDetails.status).to.be.true;
   });
 
   async function getVersionAbi(version: any) {
     if (version === 1)
-      return (await deployments.getArtifact("InstaAccount")).abi;
+      return (await deployments.getArtifact("LayerAccount")).abi;
     else
-      return (await deployments.getArtifact("InstaDefaultImplementation")).abi;
+      return (await deployments.getArtifact("LayerDefaultImplementation")).abi;
   }
 
   async function buildDSA(owner: any, version: any) {
-    const tx = await instaIndex.build(owner, version, owner);
+    const tx = await layerIndex.build(owner, version, owner);
     const receipt = await tx.wait();
     const event = receipt.events.find(
       (a: { event: string }) => a.event === "LogAccountCreated"
@@ -128,17 +128,17 @@ describe("InstaList", function () {
   }
 
   it("should check state", async function () {
-    expect(await instaList.instaIndex()).to.be.equal(instaIndex.address);
-    accounts = await instaList.accounts();
+    expect(await layerList.layerIndex()).to.be.equal(layerIndex.address);
+    accounts = await layerList.accounts();
     expect(accounts.toString()).to.be.equal(new BigNumber(0).toString());
   });
 
   it("should add v2 module to index", async function () {
-    const tx = await instaIndex
+    const tx = await layerIndex
       .connect(masterSigner)
       .addNewAccount(
-        instaDefaultAccountV2.address,
-        instaConnectorsV2.address,
+        layerDefaultAccountV2.address,
+        layerConnectorsV2.address,
         addr_zero
       );
     let txDetails = await tx.wait();
@@ -189,28 +189,28 @@ describe("InstaList", function () {
 
   describe("List init", function () {
     it("should have accounts added on build", async function () {
-      accounts = await instaList.accounts();
+      accounts = await layerList.accounts();
       expect(accounts.toString()).to.be.equal(new BigNumber(3).toString());
-      expect(await instaList.accountID(dsaWalletv1.address)).to.be.equal(
+      expect(await layerList.accountID(dsaWalletv1.address)).to.be.equal(
         new BigNumber(1).toString()
       );
-      expect(await instaList.accountID(dsaWalletv2.address)).to.be.equal(
+      expect(await layerList.accountID(dsaWalletv2.address)).to.be.equal(
         new BigNumber(2).toString()
       );
       expect(
-        await instaList.accountAddr(new BigNumber(1).toString())
+        await layerList.accountAddr(new BigNumber(1).toString())
       ).to.be.equal(dsaWalletv1.address);
       expect(
-        await instaList.accountAddr(new BigNumber(2).toString())
+        await layerList.accountAddr(new BigNumber(2).toString())
       ).to.be.equal(dsaWalletv2.address);
     });
 
     it("should revert on list init with non-index sender", async function () {
       await expect(
-        instaList.connect(signer).init(wallet1.address)
+        layerList.connect(signer).init(wallet1.address)
       ).to.be.revertedWith("not-index");
       await expect(
-        instaList.connect(signer).init(dsaWalletv1.address)
+        layerList.connect(signer).init(dsaWalletv1.address)
       ).to.be.revertedWith("not-index");
     });
   });
@@ -218,14 +218,14 @@ describe("InstaList", function () {
   describe("DSA Auths", async function () {
     it("should revert on adding auth to non-dsa i.e sender is EOA", async function () {
       await expect(
-        instaList.connect(wallet1).addAuth(wallet0.address)
+        layerList.connect(wallet1).addAuth(wallet0.address)
       ).to.be.revertedWith("not-account");
     });
 
     it("should revert on adding non-owner account as auth: must be enabled via DSA first", async function () {
       expect(await dsaWalletv1.isAuth(wallet1.address)).to.be.false;
       await expect(
-        instaList.connect(dsaV1).addAuth(wallet1.address)
+        layerList.connect(dsaV1).addAuth(wallet1.address)
       ).to.be.revertedWith("not-owner");
     });
   });
@@ -250,12 +250,12 @@ describe("InstaList", function () {
     // if (accountLink[_account].last != address(0)) ---> cover with enabling wallet1 to dsaWalletv1
 
     it("should check previous user lists and links", async function () {
-      dsaV1Id = await instaList.accountID(dsaWalletv1.address);
-      dsaV2Id = await instaList.accountID(dsaWalletv2.address);
-      userList1 = await instaList.userList(wallet0.address, dsaV1Id);
-      userList2 = await instaList.userList(wallet0.address, dsaV2Id);
-      userLink1 = await instaList.userLink(wallet0.address);
-      userLink2 = await instaList.userLink(wallet1.address);
+      dsaV1Id = await layerList.accountID(dsaWalletv1.address);
+      dsaV2Id = await layerList.accountID(dsaWalletv2.address);
+      userList1 = await layerList.userList(wallet0.address, dsaV1Id);
+      userList2 = await layerList.userList(wallet0.address, dsaV2Id);
+      userLink1 = await layerList.userLink(wallet0.address);
+      userLink2 = await layerList.userLink(wallet1.address);
       expect(userLink1.first).to.be.equal(dsaV1Id);
       expect(userLink1.last).to.be.equal(dsaV2Id);
       expect(userLink1.count).to.be.equal(new BigNumber(2).toString());
@@ -269,10 +269,10 @@ describe("InstaList", function () {
     });
 
     it("should check previous account lists and links", async function () {
-      accountList1 = await instaList.accountList(dsaV1Id, wallet0.address);
-      accountList2 = await instaList.accountList(dsaV2Id, wallet0.address);
-      accountLink1 = await instaList.accountLink(dsaV1Id);
-      accountLink2 = await instaList.accountLink(dsaV2Id);
+      accountList1 = await layerList.accountList(dsaV1Id, wallet0.address);
+      accountList2 = await layerList.accountList(dsaV2Id, wallet0.address);
+      accountLink1 = await layerList.accountLink(dsaV1Id);
+      accountLink2 = await layerList.accountLink(dsaV2Id);
       expect(accountLink1.first).to.be.equal(wallet0.address);
       expect(accountLink1.last).to.be.equal(wallet0.address);
       expect(accountLink1.count).to.be.equal(new BigNumber(1).toString());
@@ -287,13 +287,13 @@ describe("InstaList", function () {
 
     it("should enable the EOA as owner via DSA and add auth", async function () {
       expect(await dsaWalletv1.isAuth(wallet1.address)).to.be.false;
-      //tests for instaAccount.enable in v1 tests
+      //tests for layerAccount.enable in v1 tests
       let tx = await dsaWalletv1.connect(dsaV1).enable(wallet1.address);
       let txDetails = await tx.wait();
       expect(!!txDetails.status).to.be.true;
       expectEvent(
         txDetails,
-        (await deployments.getArtifact("InstaAccount")).abi,
+        (await deployments.getArtifact("LayerAccount")).abi,
         "LogEnable",
         {
           user: wallet1.address,
@@ -307,10 +307,10 @@ describe("InstaList", function () {
     });
 
     it("should have updated user lists and links", async function () {
-      userList1 = await instaList.userList(wallet0.address, dsaV1Id);
-      userList2 = await instaList.userList(wallet0.address, dsaV2Id);
-      userLink1 = await instaList.userLink(wallet0.address);
-      userLink2 = await instaList.userLink(wallet1.address);
+      userList1 = await layerList.userList(wallet0.address, dsaV1Id);
+      userList2 = await layerList.userList(wallet0.address, dsaV2Id);
+      userLink1 = await layerList.userLink(wallet0.address);
+      userLink2 = await layerList.userLink(wallet1.address);
       expect(userLink1.first).to.be.equal(dsaV1Id);
       expect(userLink1.last).to.be.equal(dsaV2Id);
       expect(userLink1.count).to.be.equal(new BigNumber(2).toString());
@@ -321,19 +321,19 @@ describe("InstaList", function () {
       expect(userList1.next).to.be.equal(dsaV2Id);
       expect(userList2.prev).to.be.equal(dsaV1Id);
       expect(userList2.next).to.be.equal(new BigNumber(0).toString());
-      userList1 = await instaList.userList(wallet1.address, dsaV1Id);
+      userList1 = await layerList.userList(wallet1.address, dsaV1Id);
       expect(userList1.prev).to.be.equal(new BigNumber("3").toString());
       expect(userList1.next).to.be.equal(new BigNumber("4").toString());
-      userList1 = await instaList.userList(wallet0.address, dsaV1Id);
+      userList1 = await layerList.userList(wallet0.address, dsaV1Id);
       expect(userList1.prev).to.be.equal(new BigNumber(0).toString());
       expect(userList1.next).to.be.equal(new BigNumber(2).toString());
     });
 
     it("should have updated account lists and links", async function () {
-      accountList1 = await instaList.accountList(dsaV1Id, wallet0.address);
-      accountList2 = await instaList.accountList(dsaV2Id, wallet0.address);
-      accountLink1 = await instaList.accountLink(dsaV1Id);
-      accountLink2 = await instaList.accountLink(dsaV2Id);
+      accountList1 = await layerList.accountList(dsaV1Id, wallet0.address);
+      accountList2 = await layerList.accountList(dsaV2Id, wallet0.address);
+      accountLink1 = await layerList.accountLink(dsaV1Id);
+      accountLink2 = await layerList.accountLink(dsaV2Id);
       expect(accountLink1.first).to.be.equal(wallet0.address);
       expect(accountLink1.last).to.be.equal(wallet1.address);
       expect(accountLink1.count).to.be.equal(new BigNumber(2).toString());
@@ -344,7 +344,7 @@ describe("InstaList", function () {
       expect(accountList1.next).to.be.equal(wallet1.address);
       expect(accountList2.prev).to.be.equal(addr_zero);
       expect(accountList2.next).to.be.equal(addr_zero);
-      accountList1 = await instaList.accountList(dsaV1Id, wallet1.address);
+      accountList1 = await layerList.accountList(dsaV1Id, wallet1.address);
       expect(accountList1.prev).to.be.equal(wallet0.address);
       expect(accountList1.next).to.be.equal(addr_zero);
     });
@@ -352,19 +352,19 @@ describe("InstaList", function () {
     it("should revert disabling auth if not been removed from _auth mapping of account", async function () {
       expect(await dsaWalletv1.isAuth(wallet1.address)).to.be.true;
       await expect(
-        instaList.connect(dsaV1).removeAuth(wallet1.address)
+        layerList.connect(dsaV1).removeAuth(wallet1.address)
       ).to.be.revertedWith("already-owner");
     });
 
     it("should enable a DSA as owner of DSA and add auth", async function () {
       expect(await dsaWalletv1.isAuth(dsaWalletv2.address)).to.be.false;
-      //tests for instaAccount.enable in v1 tests
+      //tests for layerAccount.enable in v1 tests
       let tx = await dsaWalletv1.connect(dsaV1).enable(dsaWalletv2.address);
       let txDetails = await tx.wait();
       expect(!!txDetails.status).to.be.true;
       expectEvent(
         txDetails,
-        (await deployments.getArtifact("InstaAccount")).abi,
+        (await deployments.getArtifact("LayerAccount")).abi,
         "LogEnable",
         {
           user: dsaWalletv2.address,
@@ -373,10 +373,10 @@ describe("InstaList", function () {
     });
 
     it("should have updated user lists and links", async function () {
-      userList1 = await instaList.userList(wallet0.address, dsaV1Id);
-      userList2 = await instaList.userList(wallet0.address, dsaV2Id);
-      userLink1 = await instaList.userLink(wallet0.address);
-      userLink2 = await instaList.userLink(wallet1.address);
+      userList1 = await layerList.userList(wallet0.address, dsaV1Id);
+      userList2 = await layerList.userList(wallet0.address, dsaV2Id);
+      userLink1 = await layerList.userLink(wallet0.address);
+      userLink2 = await layerList.userLink(wallet1.address);
       expect(userLink1.first).to.be.equal(dsaV1Id);
       expect(userLink1.last).to.be.equal(dsaV2Id);
       expect(userLink1.count).to.be.equal(new BigNumber(2).toString());
@@ -387,23 +387,23 @@ describe("InstaList", function () {
       expect(userList1.next).to.be.equal(dsaV2Id);
       expect(userList2.prev).to.be.equal(dsaV1Id);
       expect(userList2.next).to.be.equal(new BigNumber(0).toString());
-      userList1 = await instaList.userList(wallet1.address, dsaV1Id);
+      userList1 = await layerList.userList(wallet1.address, dsaV1Id);
       expect(userList1.prev).to.be.equal(new BigNumber("3").toString());
       expect(userList1.next).to.be.equal(new BigNumber("4").toString());
-      userList1 = await instaList.userList(dsaWalletv2.address, dsaV1Id);
+      userList1 = await layerList.userList(dsaWalletv2.address, dsaV1Id);
       expect(userList1.prev).to.be.equal(new BigNumber(0).toString());
       expect(userList1.next).to.be.equal(new BigNumber(0).toString());
-      userLink1 = await instaList.userLink(dsaWalletv2.address);
+      userLink1 = await layerList.userLink(dsaWalletv2.address);
       expect(userLink1.first).to.be.equal(dsaV1Id);
       expect(userLink1.last).to.be.equal(dsaV1Id);
       expect(userLink1.count).to.be.equal(new BigNumber(1).toString());
     });
 
     it("should have updated account lists and links", async function () {
-      accountList1 = await instaList.accountList(dsaV1Id, wallet0.address);
-      accountList2 = await instaList.accountList(dsaV2Id, wallet0.address);
-      accountLink1 = await instaList.accountLink(dsaV1Id);
-      accountLink2 = await instaList.accountLink(dsaV2Id);
+      accountList1 = await layerList.accountList(dsaV1Id, wallet0.address);
+      accountList2 = await layerList.accountList(dsaV2Id, wallet0.address);
+      accountLink1 = await layerList.accountLink(dsaV1Id);
+      accountLink2 = await layerList.accountLink(dsaV2Id);
       expect(accountLink1.first).to.be.equal(wallet0.address);
       expect(accountLink1.last).to.be.equal(dsaWalletv2.address);
       expect(accountLink1.count).to.be.equal(new BigNumber(3).toString());
@@ -414,10 +414,10 @@ describe("InstaList", function () {
       expect(accountList1.next).to.be.equal(wallet1.address);
       expect(accountList2.prev).to.be.equal(addr_zero);
       expect(accountList2.next).to.be.equal(addr_zero);
-      accountList1 = await instaList.accountList(dsaV1Id, wallet1.address);
+      accountList1 = await layerList.accountList(dsaV1Id, wallet1.address);
       expect(accountList1.prev).to.be.equal(wallet0.address);
       expect(accountList1.next).to.be.equal(dsaWalletv2.address);
-      accountList1 = await instaList.accountList(dsaV1Id, dsaWalletv2.address);
+      accountList1 = await layerList.accountList(dsaV1Id, dsaWalletv2.address);
       expect(accountList1.prev).to.be.equal(wallet1.address);
       expect(accountList1.next).to.be.equal(addr_zero);
     });
@@ -429,7 +429,7 @@ describe("InstaList", function () {
       expect(!!txDetails.status).to.be.true;
       expectEvent(
         txDetails,
-        (await deployments.getArtifact("InstaAccount")).abi,
+        (await deployments.getArtifact("LayerAccount")).abi,
         "LogDisable",
         {
           user: wallet1.address,
@@ -439,10 +439,10 @@ describe("InstaList", function () {
     });
 
     it("should check the user lists and links", async function () {
-      userList1 = await instaList.userList(wallet0.address, dsaV1Id);
-      userList2 = await instaList.userList(wallet0.address, dsaV2Id);
-      userLink1 = await instaList.userLink(wallet0.address);
-      userLink2 = await instaList.userLink(wallet1.address);
+      userList1 = await layerList.userList(wallet0.address, dsaV1Id);
+      userList2 = await layerList.userList(wallet0.address, dsaV2Id);
+      userLink1 = await layerList.userLink(wallet0.address);
+      userLink2 = await layerList.userLink(wallet1.address);
       expect(userLink1.first).to.be.equal(dsaV1Id);
       expect(userLink1.last).to.be.equal(dsaV2Id);
       expect(userLink1.count).to.be.equal(new BigNumber(2).toString());
@@ -453,23 +453,23 @@ describe("InstaList", function () {
       expect(userList1.next).to.be.equal(dsaV2Id);
       expect(userList2.prev).to.be.equal(dsaV1Id);
       expect(userList2.next).to.be.equal(new BigNumber(0).toString());
-      userList1 = await instaList.userList(wallet1.address, dsaV1Id);
+      userList1 = await layerList.userList(wallet1.address, dsaV1Id);
       expect(userList1.prev).to.be.equal(new BigNumber(0).toString());
       expect(userList1.next).to.be.equal(new BigNumber(0).toString());
-      userList1 = await instaList.userList(dsaWalletv2.address, dsaV1Id);
+      userList1 = await layerList.userList(dsaWalletv2.address, dsaV1Id);
       expect(userList1.prev).to.be.equal(new BigNumber(0).toString());
       expect(userList1.next).to.be.equal(new BigNumber(0).toString());
-      userLink1 = await instaList.userLink(dsaWalletv2.address);
+      userLink1 = await layerList.userLink(dsaWalletv2.address);
       expect(userLink1.first).to.be.equal(dsaV1Id);
       expect(userLink1.last).to.be.equal(dsaV1Id);
       expect(userLink1.count).to.be.equal(new BigNumber(1).toString());
     });
 
     it("should have updated account lists and links", async function () {
-      accountList1 = await instaList.accountList(dsaV1Id, wallet0.address);
-      accountList2 = await instaList.accountList(dsaV2Id, wallet0.address);
-      accountLink1 = await instaList.accountLink(dsaV1Id);
-      accountLink2 = await instaList.accountLink(dsaV2Id);
+      accountList1 = await layerList.accountList(dsaV1Id, wallet0.address);
+      accountList2 = await layerList.accountList(dsaV2Id, wallet0.address);
+      accountLink1 = await layerList.accountLink(dsaV1Id);
+      accountLink2 = await layerList.accountLink(dsaV2Id);
       expect(accountLink1.first).to.be.equal(wallet0.address);
       expect(accountLink1.last).to.be.equal(dsaWalletv2.address);
       expect(accountLink1.count).to.be.equal(new BigNumber(2).toString());
@@ -480,7 +480,7 @@ describe("InstaList", function () {
       expect(accountList1.next).to.be.equal(dsaWalletv2.address);
       expect(accountList2.prev).to.be.equal(addr_zero);
       expect(accountList2.next).to.be.equal(addr_zero);
-      accountList1 = await instaList.accountList(dsaV1Id, dsaWalletv2.address);
+      accountList1 = await layerList.accountList(dsaV1Id, dsaWalletv2.address);
       expect(accountList1.prev).to.be.equal(wallet0.address);
       expect(accountList1.next).to.be.equal(addr_zero);
     });
@@ -492,7 +492,7 @@ describe("InstaList", function () {
       expect(!!txDetails.status).to.be.true;
       expectEvent(
         txDetails,
-        (await deployments.getArtifact("InstaAccount")).abi,
+        (await deployments.getArtifact("LayerAccount")).abi,
         "LogDisable",
         {
           user: wallet0.address,
@@ -508,7 +508,7 @@ describe("InstaList", function () {
       expect(!!txDetails.status).to.be.true;
       expectEvent(
         txDetails,
-        (await deployments.getArtifact("InstaAccount")).abi,
+        (await deployments.getArtifact("LayerAccount")).abi,
         "LogEnable",
         {
           user: wallet0.address,
@@ -523,7 +523,7 @@ describe("InstaList", function () {
       expect(!!txDetails.status).to.be.true;
       expectEvent(
         txDetails,
-        (await deployments.getArtifact("InstaAccount")).abi,
+        (await deployments.getArtifact("LayerAccount")).abi,
         "LogDisable",
         {
           user: wallet0.address,
@@ -534,7 +534,7 @@ describe("InstaList", function () {
 
     it("should revert disabling if sender is not DSA", async function () {
       await expect(
-        instaList.connect(signer).removeAuth(wallet1.address)
+        layerList.connect(signer).removeAuth(wallet1.address)
       ).to.be.revertedWith("not-account");
     });
   });

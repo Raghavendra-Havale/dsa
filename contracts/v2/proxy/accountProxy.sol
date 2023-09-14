@@ -1,69 +1,71 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.0;
+pragma solidity ^0.8.0;
 
+/**
+ * @title AccountImplementations
+ * @dev Interface for fetching the implementation address for a given function signature.
+ */
 interface AccountImplementations {
     function getImplementation(bytes4 _sig) external view returns (address);
 }
 
 /**
- * @dev This abstract contract provides a fallback function that delegates all calls to another contract using the EVM
- * instruction `delegatecall`.
+ * @title LayerAccountV2
+ * @dev This contract provides a mechanism to delegate calls to other contracts based on function signatures.
+ * It uses a registry (AccountImplementations) to determine which contract should handle a given call.
  */
-contract InstaAccountV2 {
+contract LayerAccountV2 {
 
+    // Reference to the implementations registry.
     AccountImplementations public immutable implementations;
 
+    /**
+     * @dev Initializes the contract with the address of the implementations registry.
+     * @param _implementations Address of the implementations registry.
+     */
     constructor(address _implementations) {
         implementations = AccountImplementations(_implementations);
     }
 
     /**
-     * @dev Delegates the current call to `implementation`.
+     * @dev Delegates the current call to the provided implementation address.
+     * @param implementation Address of the contract to which the call should be delegated.
      * 
-     * This function does not return to its internall call site, it will return directly to the external caller.
+     * Note: This function does not return to its internal call site. It returns directly to the external caller.
      */
     function _delegate(address implementation) internal {
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            // Copy msg.data. We take full control of memory in this inline assembly
-            // block because it will not return to Solidity code. We overwrite the
-            // Solidity scratch pad at memory position 0.
             calldatacopy(0, 0, calldatasize())
-
-            // Call the implementation.
-            // out and outsize are 0 because we don't know the size yet.
             let result := delegatecall(gas(), implementation, 0, calldatasize(), 0, 0)
-
-            // Copy the returned data.
             returndatacopy(0, 0, returndatasize())
-
             switch result
-            // delegatecall returns 0 on error.
             case 0 { revert(0, returndatasize()) }
             default { return(0, returndatasize()) }
         }
     }
 
     /**
-     * @dev Delegates the current call to the address returned by Implementations registry.
+     * @dev Delegates the current call based on the function signature to the address returned by the Implementations registry.
+     * @param _sig Function signature of the current call.
      * 
-     * This function does not return to its internall call site, it will return directly to the external caller.
+     * Note: This function does not return to its internal call site. It returns directly to the external caller.
      */
     function _fallback(bytes4 _sig) internal {
         address _implementation = implementations.getImplementation(_sig);
-        require(_implementation != address(0), "InstaAccountV2: Not able to find _implementation");
+        require(_implementation != address(0), "LayerAccountV2: No implementation found for the given signature");
         _delegate(_implementation);
     }
 
     /**
-     * @dev Fallback function that delegates calls to the address returned by Implementations registry.
+     * @dev Fallback function that delegates calls based on their function signature to the address returned by the Implementations registry.
      */
     fallback () external payable {
         _fallback(msg.sig);
     }
 
     /**
-     * @dev Fallback function that delegates calls to the address returned by Implementations registry.
+     * @dev Receive function that handles incoming ether. If a function signature is provided, it delegates the call based on the signature.
      */
     receive () external payable {
         if (msg.sig != 0x00000000) {

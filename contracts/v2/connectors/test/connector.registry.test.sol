@@ -1,8 +1,8 @@
-pragma solidity ^0.7.0;
+pragma solidity ^0.8.0;
 pragma experimental ABIEncoderV2;
 
 /**
- * @title InstaConnectorsV2
+ * @title layerConnectorsV2
  * @dev Registry for Connectors.
  */
 
@@ -17,11 +17,11 @@ interface ConnectorInterface {
 contract Controllers {
     event LogController(address indexed addr, bool indexed isChief);
 
-    // InstaIndex Address.
-    address public immutable instaIndex;
+    // layerIndex Address.
+    address public immutable layerIndex;
 
-    constructor(address _instaIndex) {
-        instaIndex = _instaIndex;
+    constructor(address _layerIndex) {
+        layerIndex = _layerIndex;
     }
 
     // Enabled Chief(Address of Chief => bool).
@@ -30,13 +30,13 @@ contract Controllers {
     mapping(string => address) public connectors;
 
     /**
-     * @dev Throws if the sender not is Master Address from InstaIndex
+     * @dev Throws if the sender not is Master Address from layerIndex
      * or Enabled Chief.
      */
     modifier isChief() {
         require(
             chief[msg.sender] ||
-                msg.sender == IndexInterface(instaIndex).master(),
+                msg.sender == IndexInterface(layerIndex).master(),
             "not-an-chief"
         );
         _;
@@ -48,7 +48,7 @@ contract Controllers {
      */
     function toggleChief(address _chiefAddress) external {
         require(
-            msg.sender == IndexInterface(instaIndex).master(),
+            msg.sender == IndexInterface(layerIndex).master(),
             "toggleChief: not-master"
         );
         chief[_chiefAddress] = !chief[_chiefAddress];
@@ -56,7 +56,7 @@ contract Controllers {
     }
 }
 
-contract InstaConnectorsV2Test is Controllers {
+contract LayerConnectorsV2Test is Controllers {
     event LogConnectorAdded(
         bytes32 indexed connectorNameHash,
         string connectorName,
@@ -74,7 +74,7 @@ contract InstaConnectorsV2Test is Controllers {
         address indexed connector
     );
 
-    constructor(address _instaIndex) public Controllers(_instaIndex) {}
+    constructor(address _layerIndex) public Controllers(_layerIndex) {}
 
     /**
      * @dev Add Connectors

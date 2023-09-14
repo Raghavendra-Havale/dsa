@@ -1,10 +1,11 @@
-pragma solidity ^0.7.0;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 pragma experimental ABIEncoderV2;
 import "hardhat/console.sol";
 
 
 /**
- * @title InstaAccountV2 Mapping 2.
+ * @title layerAccountV2 Mapping 2.
  * @dev DeFi Smart Account Wallet.
  */
 
@@ -26,14 +27,14 @@ interface CheckInterface {
     function isOk() external view returns (bool);
 }
 
-contract InstaImplementationM2 {
-    address internal immutable instaIndex;
+contract LayerImplementationM2 {
+    address internal immutable layerIndex;
     // Connnectors Address.
     address public immutable connectorsM2;
 
-    constructor(address _instaIndex, address _connectors) {
+    constructor(address _layerIndex, address _connectors) {
         connectorsM2 = _connectors;
-        instaIndex = _instaIndex;
+        layerIndex = _layerIndex;
     }
     
     function decodeEvent(bytes memory response) internal pure returns (string memory _eventCode, bytes memory _eventParams) {
@@ -90,14 +91,14 @@ contract InstaImplementationM2 {
     )
     external
     payable 
-    returns (bytes32) // Dummy return to fix instaIndex buildWithCast function
+    returns (bytes32) // Dummy return to fix layerIndex buildWithCast function
     {   
 
         DefaultImplementation defaultImplementation = DefaultImplementation(address(this));
         uint256 _length = _targetNames.length;
 
-        require(defaultImplementation.isAuth(msg.sender) || msg.sender == address(instaIndex), "InstaImplementationM1: permission-denied");
-        require(_length == _datas.length , "InstaImplementationM1: array-length-invalid");
+        require(defaultImplementation.isAuth(msg.sender) || msg.sender == address(layerIndex), "layerImplementationM1: permission-denied");
+        require(_length == _datas.length , "layerImplementationM1: array-length-invalid");
 
         string[] memory eventNames = new string[](_length);
         bytes[] memory eventParams = new bytes[](_length);

@@ -1,4 +1,4 @@
-pragma solidity ^0.7.0;
+pragma solidity ^0.8.0;
 pragma experimental ABIEncoderV2;
 
 /**
@@ -48,26 +48,26 @@ contract Basics {
     /**
      * @dev Return Address.
     */
-    address public immutable instaList;
+    address public immutable layerList;
 
-    constructor(address _instaList) {
-        instaList = _instaList;
+    constructor(address _layerList) {
+        layerList = _layerList;
     }
 
 }
 
 contract Helpers is Basics {
-    constructor(address _instaList) Basics(_instaList) {}
+    constructor(address _layerList) Basics(_layerList) {}
 
     function checkAuthCount() internal view returns (uint count) {
-        ListInterface listContract = ListInterface(instaList);
+        ListInterface listContract = ListInterface(layerList);
         uint64 accountId = listContract.accountID(address(this));
         count = listContract.accountLink(accountId).count;
     }
 }
 
 contract Auth is Helpers {
-    constructor(address _instaList) Helpers(_instaList) {}
+    constructor(address _layerList) Helpers(_layerList) {}
 
     event LogAddAuth(address indexed _msgSender, address indexed _authority);
     event LogRemoveAuth(address indexed _msgSender, address indexed _authority);
@@ -105,6 +105,6 @@ contract Auth is Helpers {
 
 
 contract ConnectV2Auth is Auth {
-    constructor(address _instaList) Auth(_instaList) {}
+    constructor(address _layerList) Auth(_layerList) {}
     string public constant name = "Auth-v1";
 }

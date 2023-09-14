@@ -1,10 +1,11 @@
-pragma solidity ^0.7.0;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 pragma experimental ABIEncoderV2;
 
 import {Variables} from "../variables.sol";
 
 /**
- * @title InstaAccountV2.
+ * @title layerAccountV2.
  * @dev DeFi Smart Account Wallet.
  */
 
@@ -16,20 +17,20 @@ interface ConnectorsInterface {
 }
 
 contract Constants is Variables {
-    // InstaIndex Address.
-    address internal immutable instaIndex;
+    // layerIndex Address.
+    address internal immutable layerIndex;
     // Connectors Address.
     address public immutable connectorsM1;
 
-    constructor(address _instaIndex, address _connectors) {
+    constructor(address _layerIndex, address _connectors) {
         connectorsM1 = _connectors;
-        instaIndex = _instaIndex;
+        layerIndex = _layerIndex;
     }
 }
 
-contract InstaImplementationBetaTest is Constants {
-    constructor(address _instaIndex, address _connectors)
-        Constants(_instaIndex, _connectors)
+contract LayerImplementationBetaTest is Constants {
+    constructor(address _layerIndex, address _connectors)
+        Constants(_layerIndex, _connectors)
     {}
 
     function decodeEvent(bytes memory response)
@@ -106,13 +107,13 @@ contract InstaImplementationBetaTest is Constants {
         external
         payable
         returns (
-            bytes32 // Dummy return to fix instaIndex buildWithCast function
+            bytes32 // Dummy return to fix layerIndex buildWithCast function
         )
     {
         require(_beta, "Beta-does-not-enabled");
         uint256 _length = _targetNames.length;
         require(
-            _auth[msg.sender] || msg.sender == instaIndex,
+            _auth[msg.sender] || msg.sender == layerIndex,
             "1: permission-denied"
         );
         require(_length != 0, "1: length-invalid");

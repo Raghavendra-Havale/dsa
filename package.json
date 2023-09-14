@@ -25,7 +25,7 @@
     "@nomiclabs/hardhat-etherscan": "^2.1.6",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "@nomiclabs/hardhat-web3": "^2.0.0",
-    "@openzeppelin/contracts": "^3.4.1-solc-0.7",
+    "@openzeppelin/contracts": "^3.4.2",
     "@openzeppelin/upgrades": "^2.8.0",
     "@typechain/ethers-v5": "^8.0.5",
     "@typechain/hardhat": "^3.1.0",
@@ -38,6 +38,7 @@
     "hardhat-deploy-ethers": "^0.3.0-beta.10",
     "replace-in-file": "^5.0.2",
     "solc": "^0.6.12",
+    "solidity-docgen": "^0.6.0-beta.36",
     "typechain": "^6.0.5",
     "web3-abi-helper": "^4.1.0"
   },

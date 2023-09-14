@@ -1,7 +1,7 @@
-pragma solidity ^0.7.0;
+pragma solidity ^0.8.0;
 
 /**
- * @title InstaConnectors
+ * @title LayerConnectors
  * @dev Registry for Connectors.
  */
 
@@ -33,11 +33,11 @@ contract Controllers is DSMath {
     event LogAddController(address indexed addr);
     event LogRemoveController(address indexed addr);
 
-    // InstaIndex Address.
-    address public immutable instaIndex;
+    // LayerIndex Address.
+    address public immutable layerIndex;
 
-    constructor (address _instaIndex) {
-        instaIndex = _instaIndex;
+    constructor (address _layerIndex) {
+        layerIndex = _layerIndex;
     }
 
     // Enabled Chief(Address of Chief => bool).
@@ -48,11 +48,11 @@ contract Controllers is DSMath {
     mapping(address => bool) public staticConnectors;
 
     /**
-    * @dev Throws if the sender not is Master Address from InstaIndex
+    * @dev Throws if the sender not is Master Address from LayerIndex
     * or Enabled Chief.
     */
     modifier isChief {
-        require(chief[msg.sender] || msg.sender == IndexInterface(instaIndex).master(), "not-an-chief");
+        require(chief[msg.sender] || msg.sender == IndexInterface(layerIndex).master(), "not-an-chief");
         _;
     }
 
@@ -79,7 +79,7 @@ contract Controllers is DSMath {
 
 contract Listings is Controllers {
 
-    constructor (address _instaIndex) Controllers(_instaIndex) {
+    constructor (address _layerIndex) Controllers(_layerIndex) {
     }
 
     // Connectors Array.
@@ -117,9 +117,9 @@ contract Listings is Controllers {
 }
 
 
-contract InstaConnectors is Listings {
+contract LayerConnectors is Listings {
 
-    constructor (address _instaIndex) public Listings(_instaIndex) {
+    constructor (address _layerIndex) public Listings(_layerIndex) {
     }
 
     event LogEnable(address indexed connector);

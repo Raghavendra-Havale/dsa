@@ -1,8 +1,9 @@
-pragma solidity ^0.7.0;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 pragma experimental ABIEncoderV2;
 
 /**
- * @title InstaIndex
+ * @title LayerIndex
  * @dev Main Contract For DeFi Smart Accounts. This is also a factory contract, Which deploys new Smart Account.
  * Also Registry for DeFi Smart Accounts.
  */
@@ -17,6 +18,10 @@ interface ListInterface {
     function init(address _account) external;
 }
 
+/**
+ * @title AddressIndex
+ * @dev Contract to manage master address, connectors, checks, and account versions.
+ */
 contract AddressIndex {
 
     event LogNewMaster(address indexed master);
@@ -60,6 +65,9 @@ contract AddressIndex {
         emit LogNewMaster(_newMaster);
     }
 
+    /**
+     * @dev Update the Master Address to the new master.
+     */
     function updateMaster() external {
         require(newMaster != address(0), "not-valid-address");
         require(msg.sender == newMaster, "not-master");
@@ -97,6 +105,10 @@ contract AddressIndex {
 
 }
 
+/**
+ * @title CloneFactory
+ * @dev Contract to clone other contracts.
+ */
 contract CloneFactory is AddressIndex {
     /**
      * @dev Clone a new Account Module.
@@ -138,7 +150,11 @@ contract CloneFactory is AddressIndex {
     }
 }
 
-contract InstaIndex is CloneFactory {
+/**
+ * @title LayerIndex
+ * @dev Main contract for creating and managing DeFi Smart Accounts.
+ */
+contract LayerIndex is CloneFactory {
 
     event LogAccountCreated(address sender, address indexed owner, address indexed account, address indexed origin);
 
@@ -180,7 +196,7 @@ contract InstaIndex is CloneFactory {
     }
 
     /**
-     * @dev Setup Initial things for InstaIndex, after its been deployed and can be only run once.
+     * @dev Setup Initial things for LayerIndex, after its been deployed and can be only run once.
      * @param _master The Master Address.
      * @param _list The List Address.
      * @param _account The Account Module Address.

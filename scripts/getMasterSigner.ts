@@ -3,12 +3,12 @@ const { ethers } = hre;
 import addresses from "./constant/addresses";
 
 const networkType = process.env.networkType ?? "mainnet";
-const INSTA_INDEX = addresses.InstaIndex[networkType];
+const LAYER_INDEX = addresses.LayerIndex[networkType];
 
 export default async function () {
-  const instaIndex = await ethers.getContractAt("InstaIndex", INSTA_INDEX);
+  const layerIndex = await ethers.getContractAt("LayerIndex", LAYER_INDEX);
 
-  const masterAddress = await instaIndex.master(); // TODO: make it constant?
+  const masterAddress = await layerIndex.master(); // TODO: make it constant?
   await hre.network.provider.request({
     method: "hardhat_impersonateAccount",
     params: [masterAddress],

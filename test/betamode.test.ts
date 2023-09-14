@@ -6,7 +6,7 @@ import encodeSpells from "../scripts/encodeSpells";
 import getMasterSigner from "../scripts/getMasterSigner";
 import addresses from "../scripts/constant/addresses";
 import {
-  InstaDefaultImplementationV2__factory,
+  LayerDefaultImplementationV2__factory,
   ConnectV2Beta__factory,
 } from "../typechain";
 const { ethers, web3, deployments, waffle } = hre;
@@ -16,17 +16,17 @@ import type { Signer, Contract } from "ethers";
 describe("Betamode", function () {
   const address_zero = "0x0000000000000000000000000000000000000000";
 
-  let instaConnectorsV2: Contract,
+  let layerConnectorsV2: Contract,
     implementationsMapping: Contract,
-    instaAccountV2Proxy: Contract,
-    instaAccountV2ImplM1: Contract,
-    instaAccountV2ImplM2: Contract,
-    instaAccountV2DefaultImpl: Contract,
-    instaAccountV2DefaultImplV2: Contract,
-    instaIndex: Contract,
-    instaAccountV2ImplBeta: Contract;
+    layerAccountV2Proxy: Contract,
+    layerAccountV2ImplM1: Contract,
+    layerAccountV2ImplM2: Contract,
+    layerAccountV2DefaultImpl: Contract,
+    layerAccountV2DefaultImplV2: Contract,
+    layerIndex: Contract,
+    layerAccountV2ImplBeta: Contract;
 
-  const instaAccountV2DefaultImplSigsV2 = [
+  const layerAccountV2DefaultImplSigsV2 = [
     "enable(address)",
     "disable(address)",
     "isAuth(address)",
@@ -36,11 +36,11 @@ describe("Betamode", function () {
     "toogleBeta()",
   ].map((a) => web3.utils.keccak256(a).slice(0, 10));
 
-  const instaAccountV2ImplM1Sigs = ["cast(string[],bytes[],address)"].map((a) =>
+  const layerAccountV2ImplM1Sigs = ["cast(string[],bytes[],address)"].map((a) =>
     web3.utils.keccak256(a).slice(0, 10)
   );
 
-  const instaAccountV2ImplBetaSigs = ["castBeta(string[],bytes[],address)"].map(
+  const layerAccountV2ImplBetaSigs = ["castBeta(string[],bytes[],address)"].map(
     (a) => web3.utils.keccak256(a).slice(0, 10)
   );
 
@@ -66,128 +66,128 @@ describe("Betamode", function () {
       ],
     });
     const result = await deployContracts();
-    instaAccountV2DefaultImpl = result.instaAccountV2DefaultImpl;
-    instaIndex = result.instaIndex;
-    instaConnectorsV2 = result.instaConnectorsV2;
+    layerAccountV2DefaultImpl = result.layerAccountV2DefaultImpl;
+    layerIndex = result.layerIndex;
+    layerConnectorsV2 = result.layerConnectorsV2;
     implementationsMapping = result.implementationsMapping;
-    instaAccountV2Proxy = result.instaAccountV2Proxy;
-    instaAccountV2ImplM1 = result.instaAccountV2ImplM1;
-    instaAccountV2ImplM2 = result.instaAccountV2ImplM2;
+    layerAccountV2Proxy = result.layerAccountV2Proxy;
+    layerAccountV2ImplM1 = result.layerAccountV2ImplM1;
+    layerAccountV2ImplM2 = result.layerAccountV2ImplM2;
 
-    const InstaAccountV2ImplBeta = await ethers.getContractFactory(
-      "InstaImplementationBetaTest"
+    const LayerAccountV2ImplBeta = await ethers.getContractFactory(
+      "LayerImplementationBetaTest"
     );
-    instaAccountV2ImplBeta = await InstaAccountV2ImplBeta.deploy(
-      instaIndex.address,
-      instaConnectorsV2.address
+    layerAccountV2ImplBeta = await LayerAccountV2ImplBeta.deploy(
+      layerIndex.address,
+      layerConnectorsV2.address
     );
     masterSigner = await getMasterSigner();
-    instaAccountV2DefaultImplV2 = await deployContract(
+    layerAccountV2DefaultImplV2 = await deployContract(
       masterSigner,
-      InstaDefaultImplementationV2__factory,
+      LayerDefaultImplementationV2__factory,
       []
     );
   });
 
   it("Should have contracts deployed.", async function () {
-    expect(!!instaConnectorsV2.address).to.be.true;
+    expect(!!layerConnectorsV2.address).to.be.true;
     expect(!!implementationsMapping.address).to.be.true;
-    expect(!!instaAccountV2Proxy.address).to.be.true;
-    expect(!!instaAccountV2ImplM1.address).to.be.true;
-    expect(!!instaAccountV2ImplM2.address).to.be.true;
+    expect(!!layerAccountV2Proxy.address).to.be.true;
+    expect(!!layerAccountV2ImplM1.address).to.be.true;
+    expect(!!layerAccountV2ImplM2.address).to.be.true;
   });
 
   describe("Implementations", function () {
     it("Should add default implementation to mapping.", async function () {
       const tx = await implementationsMapping
         .connect(masterSigner)
-        .setDefaultImplementation(instaAccountV2DefaultImpl.address);
+        .setDefaultImplementation(layerAccountV2DefaultImpl.address);
       await tx.wait();
       expect(await implementationsMapping.defaultImplementation()).to.be.equal(
-        instaAccountV2DefaultImpl.address
+        layerAccountV2DefaultImpl.address
       );
     });
 
-    it("Should add instaAccountV2ImplM1 sigs to mapping.", async function () {
+    it("Should add layerAccountV2ImplM1 sigs to mapping.", async function () {
       const tx = await implementationsMapping
         .connect(masterSigner)
         .addImplementation(
-          instaAccountV2ImplM1.address,
-          instaAccountV2ImplM1Sigs
+          layerAccountV2ImplM1.address,
+          layerAccountV2ImplM1Sigs
         );
       await tx.wait();
       expect(
         await implementationsMapping.getSigImplementation(
-          instaAccountV2ImplM1Sigs[0]
+          layerAccountV2ImplM1Sigs[0]
         )
-      ).to.be.equal(instaAccountV2ImplM1.address);
+      ).to.be.equal(layerAccountV2ImplM1.address);
       (
         await implementationsMapping.getImplementationSigs(
-          instaAccountV2ImplM1.address
+          layerAccountV2ImplM1.address
         )
       ).forEach((a: any, i: any) => {
-        expect(a).to.be.eq(instaAccountV2ImplM1Sigs[i]);
+        expect(a).to.be.eq(layerAccountV2ImplM1Sigs[i]);
       });
     });
 
-    it("Should add instaAccountV2ImplBeta sigs to mapping.", async function () {
+    it("Should add layerAccountV2ImplBeta sigs to mapping.", async function () {
       const tx = await implementationsMapping
         .connect(masterSigner)
         .addImplementation(
-          instaAccountV2ImplBeta.address,
-          instaAccountV2ImplBetaSigs
+          layerAccountV2ImplBeta.address,
+          layerAccountV2ImplBetaSigs
         );
       await tx.wait();
       expect(
         await implementationsMapping.getSigImplementation(
-          instaAccountV2ImplBetaSigs[0]
+          layerAccountV2ImplBetaSigs[0]
         )
-      ).to.be.equal(instaAccountV2ImplBeta.address);
+      ).to.be.equal(layerAccountV2ImplBeta.address);
       (
         await implementationsMapping.getImplementationSigs(
-          instaAccountV2ImplBeta.address
+          layerAccountV2ImplBeta.address
         )
       ).forEach((a, i) => {
-        expect(a).to.be.eq(instaAccountV2ImplBetaSigs[i]);
+        expect(a).to.be.eq(layerAccountV2ImplBetaSigs[i]);
       });
     });
 
-    it("Should add InstaAccountV2 in Index.sol", async function () {
-      const tx = await instaIndex
+    it("Should add LayerAccountV2 in Index.sol", async function () {
+      const tx = await layerIndex
         .connect(masterSigner)
-        .addNewAccount(instaAccountV2Proxy.address, address_zero, address_zero);
+        .addNewAccount(layerAccountV2Proxy.address, address_zero, address_zero);
       await tx.wait();
-      expect(await instaIndex.account(2)).to.be.equal(
-        instaAccountV2Proxy.address
+      expect(await layerIndex.account(2)).to.be.equal(
+        layerAccountV2Proxy.address
       );
     });
 
-    it("Should add InstaDefaultImplementationV2 sigs to mapping.", async function () {
+    it("Should add LayerDefaultImplementationV2 sigs to mapping.", async function () {
       const tx = await implementationsMapping
         .connect(masterSigner)
         .addImplementation(
-          instaAccountV2DefaultImplV2.address,
-          instaAccountV2DefaultImplSigsV2
+          layerAccountV2DefaultImplV2.address,
+          layerAccountV2DefaultImplSigsV2
         );
       await tx.wait();
       expect(
         await implementationsMapping.getSigImplementation(
-          instaAccountV2DefaultImplSigsV2[0]
+          layerAccountV2DefaultImplSigsV2[0]
         )
-      ).to.be.equal(instaAccountV2DefaultImplV2.address);
+      ).to.be.equal(layerAccountV2DefaultImplV2.address);
       (
         await implementationsMapping.getImplementationSigs(
-          instaAccountV2DefaultImplV2.address
+          layerAccountV2DefaultImplV2.address
         )
       ).forEach((a, i) => {
-        expect(a).to.be.eq(instaAccountV2DefaultImplSigsV2[i]);
+        expect(a).to.be.eq(layerAccountV2DefaultImplSigsV2[i]);
       });
     });
   });
 
   describe("Beta-mode", function () {
     it("Should build DSA v2", async function () {
-      const tx = await instaIndex
+      const tx = await layerIndex
         .connect(wallet0)
         .build(wallet0.address, 2, wallet0.address);
       const dsaWalletAddress = "0xC13920c134d38408871E7AF5C102894CB5180B92";
@@ -195,16 +195,16 @@ describe("Betamode", function () {
         dsaWalletAddress
       );
       acountV2DsaM1Wallet0 = await ethers.getContractAt(
-        "InstaImplementationM1",
+        "LayerImplementationM1",
         dsaWalletAddress
       );
 
       acountV2DsaDefaultWallet0 = await ethers.getContractAt(
-        "InstaDefaultImplementation",
+        "LayerDefaultImplementation",
         dsaWalletAddress
       );
       acountV2DsaBetaWallet0 = await ethers.getContractAt(
-        "InstaImplementationBetaTest",
+        "LayerImplementationBetaTest",
         dsaWalletAddress
       );
     });
@@ -217,7 +217,7 @@ describe("Betamode", function () {
         factory: ConnectV2Beta__factory,
       });
       expect(!!addresses.connectors["betaV2"]).to.be.true;
-      const tx = await instaConnectorsV2
+      const tx = await layerConnectorsV2
         .connect(masterSigner)
         .addConnectors(["betaV2"], [addresses.connectors["betaV2"]]);
       const receipt = await tx.wait();

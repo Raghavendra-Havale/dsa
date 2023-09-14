@@ -10,6 +10,7 @@ import "@openzeppelin/hardhat-upgrades";
 import "@typechain/hardhat";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
+import "solidity-docgen";
 
 import { resolve } from "path";
 import { config as dotenvConfig } from "dotenv";
@@ -27,6 +28,7 @@ const chainIds = {
   avalanche: 43114,
   polygon: 137,
   arbitrum: 42161,
+  goerli: 5,
 };
 
 const ALCHEMY_ID = process.env.ALCHEMY_ID;
@@ -54,11 +56,11 @@ function getNetworkUrl(networkType: string) {
     return `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_ID}`;
   else if (networkType === "arbitrum")
     return `https://arb-mainnet.g.alchemy.com/v2/${ALCHEMY_ID}`;
-  else if (networkType === "kovan")
-    return `https://arb-mainnet.g.alchemy.com/v2/${ALCHEMY_ID}`;
+  else if (networkType === "goerli")
+    return `https://eth-goerli.g.alchemy.com/v2/${ALCHEMY_ID}`;
   else return `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_ID}`;
 }
-const INSTA_MASTER = "0xb1DC62EC38E6E3857a887210C38418E4A17Da5B2";
+const INSTA_MASTER = "0xA3014F25945ae21119cecbea96056E826B6ae19B";
 
 // ================================= CONFIG =========================================
 const config = {
@@ -83,7 +85,7 @@ const config = {
       blockGasLimit: 12000000,
       masterAddress: INSTA_MASTER,
     },
-    kovan: createConfig("kovan"),
+    goerli: createConfig("goerli"),
     mainnet: createConfig("mainnet"),
     matic: createConfig("polygon"),
     avax: createConfig("avalanche"),
@@ -92,19 +94,7 @@ const config = {
   solidity: {
     compilers: [
       {
-        version: "0.6.0",
-        settings: {
-          optimizer: { enabled: false },
-        },
-      },
-      {
-        version: "0.6.8",
-        settings: {
-          optimizer: { enabled: false },
-        },
-      },
-      {
-        version: "0.7.0",
+        version: "0.8.0",
         settings: {
           optimizer: { enabled: false },
         },

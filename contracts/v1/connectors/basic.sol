@@ -1,4 +1,5 @@
-pragma solidity ^0.7.0;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 
 /**
  * @title ConnectBasic.
@@ -29,30 +30,30 @@ interface EventInterface {
 contract Memory {
 
      /**
-     * @dev InstaMemory Address.
+     * @dev LayerMemory Address.
      */
-    address public immutable instaMemoryAddress;
+    address public immutable layerMemoryAddress;
 
-    constructor (address _instaMemoryAddress) {
-        instaMemoryAddress = _instaMemoryAddress;
+    constructor (address _layerMemoryAddress) {
+        layerMemoryAddress = _layerMemoryAddress;
     }
 
     /**
-     * @dev Get Stored Uint Value From InstaMemory.
+     * @dev Get Stored Uint Value From LayerMemory.
      * @param getId Storage ID.
      * @param val if any value.
      */
     function getUint(uint getId, uint val) internal returns (uint returnVal) {
-        returnVal = getId == 0 ? val : MemoryInterface(instaMemoryAddress).getUint(getId);
+        returnVal = getId == 0 ? val : MemoryInterface(layerMemoryAddress).getUint(getId);
     }
 
     /**
-     * @dev Store Uint Value In InstaMemory.
+     * @dev Store Uint Value In LayerMemory.
      * @param setId Storage ID.
      * @param val Value To store.
      */
     function setUint(uint setId, uint val) internal {
-        if (setId != 0) MemoryInterface(instaMemoryAddress).setUint(setId, val);
+        if (setId != 0) MemoryInterface(layerMemoryAddress).setUint(setId, val);
     }
 
     /**
@@ -70,12 +71,12 @@ contract BasicResolver is Memory {
     event LogWithdraw(address indexed erc20, uint256 tokenAmt, address indexed to, uint256 getId, uint256 setId);
 
       /**
-     * @dev InstaEvent Address.
+     * @dev LayerEvent Address.
      */
-    address public immutable instaEventAddress;
+    address public immutable layerEventAddress;
     
-    constructor (address _instaEventAddress, address _instaMemoryAddress) Memory(_instaMemoryAddress) {
-        instaEventAddress = _instaEventAddress;
+    constructor (address _layerEventAddress, address _layerMemoryAddress) Memory(_layerMemoryAddress) {
+        layerEventAddress = _layerEventAddress;
     }
     /**
      * @dev ETH Address.
@@ -95,10 +96,10 @@ contract BasicResolver is Memory {
         uint amt = getUint(getId, tokenAmt);
         if (erc20 != getEthAddr()) {
             ERC20Interface token = ERC20Interface(erc20);
-            amt = amt == uint(-1) ? token.balanceOf(msg.sender) : amt;
+            amt = amt == type(uint256).max ? token.balanceOf(msg.sender) : amt;
             token.transferFrom(msg.sender, address(this), amt);
         } else {
-            require(msg.value == amt || amt == uint(-1), "invalid-ether-amount");
+            require(msg.value == amt || amt == type(uint256).max, "invalid-ether-amount");
             amt = msg.value;
         }
         setUint(setId, amt);
@@ -108,7 +109,7 @@ contract BasicResolver is Memory {
         bytes32 _eventCode = keccak256("LogDeposit(address,uint256,uint256,uint256)");
         bytes memory _eventParam = abi.encode(erc20, amt, getId, setId);
         (uint _type, uint _id) = connectorID();
-        EventInterface(instaEventAddress).emitEvent(_type, _id, _eventCode, _eventParam);
+        EventInterface(layerEventAddress).emitEvent(_type, _id, _eventCode, _eventParam);
     }
 
    /**
@@ -129,11 +130,11 @@ contract BasicResolver is Memory {
         require(AccountInterface(address(this)).isAuth(to), "invalid-to-address");
         uint amt = getUint(getId, tokenAmt);
         if (erc20 == getEthAddr()) {
-            amt = amt == uint(-1) ? address(this).balance : amt;
+            amt = amt == type(uint256).max ? address(this).balance : amt;
             to.transfer(amt);
         } else {
             ERC20Interface token = ERC20Interface(erc20);
-            amt = amt == uint(-1) ? token.balanceOf(address(this)) : amt;
+            amt = amt == type(uint256).max ? token.balanceOf(address(this)) : amt;
             token.transfer(to, amt);
         }
         setUint(setId, amt);
@@ -143,7 +144,7 @@ contract BasicResolver is Memory {
         bytes32 _eventCode = keccak256("LogWithdraw(address,uint256,address,uint256,uint256)");
         bytes memory _eventParam = abi.encode(erc20, amt, to, getId, setId);
         (uint _type, uint _id) = connectorID();
-        EventInterface(instaEventAddress).emitEvent(_type, _id, _eventCode, _eventParam);
+        EventInterface(layerEventAddress).emitEvent(_type, _id, _eventCode, _eventParam);
     }
 
 }
@@ -151,6 +152,6 @@ contract BasicResolver is Memory {
 
 contract ConnectBasic is BasicResolver {
 
-    constructor (address _instaEventAddress, address _instaMemoryAddress) public BasicResolver(_instaEventAddress, _instaMemoryAddress) {}
+    constructor (address _layerEventAddress, address _layerMemoryAddress) public BasicResolver(_layerEventAddress, _layerMemoryAddress) {}
     string public constant name = "Basic-v1";
 }

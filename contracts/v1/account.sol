@@ -1,8 +1,8 @@
-pragma solidity ^0.7.0;
+pragma solidity ^0.8.0;
 pragma experimental ABIEncoderV2;
 
 /**
- * @title InstaAccount.
+ * @title LayerAccount.
  * @dev DeFi Smart Account Wallet.
  */
 
@@ -33,8 +33,8 @@ contract Record {
     event LogDisable(address indexed user);
     event LogSwitchShield(bool _shield);
 
-    // InstaIndex Address.
-    address public immutable instaIndex;
+    // LayerIndex Address.
+    address public immutable layerIndex;
     // The Account Module Version.
     uint public constant version = 1;
     // Auth Module(Address of Auth => bool).
@@ -42,8 +42,8 @@ contract Record {
     // Is shield true/false.
     bool public shield;
 
-    constructor (address _instaIndex) {
-        instaIndex = _instaIndex;
+    constructor (address _layerIndex) {
+        layerIndex = _layerIndex;
     }
 
     /**
@@ -69,11 +69,11 @@ contract Record {
      * @param user Owner of the Smart Account.
     */
     function enable(address user) public {
-        require(msg.sender == address(this) || msg.sender == instaIndex, "not-self-index");
+        require(msg.sender == address(this) || msg.sender == layerIndex, "not-self-index");
         require(user != address(0), "not-valid");
         require(!auth[user], "already-enabled");
         auth[user] = true;
-        ListInterface(IndexInterface(instaIndex).list()).addAuth(user);
+        ListInterface(IndexInterface(layerIndex).list()).addAuth(user);
         emit LogEnable(user);
     }
 
@@ -86,15 +86,15 @@ contract Record {
         require(user != address(0), "not-valid");
         require(auth[user], "already-disabled");
         delete auth[user];
-        ListInterface(IndexInterface(instaIndex).list()).removeAuth(user);
+        ListInterface(IndexInterface(layerIndex).list()).removeAuth(user);
         emit LogDisable(user);
     }
 
 }
 
-contract InstaAccount is Record {
+contract LayerAccount is Record {
 
-    constructor (address _instaIndex) public Record(_instaIndex) {
+    constructor (address _layerIndex) public Record(_layerIndex) {
     }
 
     event LogCast(address indexed origin, address indexed sender, uint value);
@@ -135,9 +135,9 @@ contract InstaAccount is Record {
     external
     payable
     {
-        require(isAuth(msg.sender) || msg.sender == instaIndex, "permission-denied");
+        require(isAuth(msg.sender) || msg.sender == layerIndex, "permission-denied");
         require(_targets.length == _datas.length , "array-length-invalid");
-        IndexInterface indexContract = IndexInterface(instaIndex);
+        IndexInterface indexContract = IndexInterface(layerIndex);
         bool isShield = shield;
         if (!isShield) {
             require(ConnectorsInterface(indexContract.connectors(version)).isConnector(_targets), "not-connector");

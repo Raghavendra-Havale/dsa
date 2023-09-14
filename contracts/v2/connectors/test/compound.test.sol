@@ -1,4 +1,4 @@
-pragma solidity ^0.7.0;
+pragma solidity ^0.8.0;
 
 interface CTokenInterface {
     function mint(uint mintAmount) external returns (uint);
@@ -38,7 +38,7 @@ interface ComptrollerInterface {
     function claimComp(address) external;
 }
 
-interface InstaMapping {
+interface layerMapping {
     function cTokenMapping(address) external view returns (address);
 }
 
@@ -86,18 +86,18 @@ contract Helpers is DSMath {
      * @dev Return Memory Variable Address
      */
     function getMemoryAddr() internal pure returns (address) {
-        return 0x8a5419CfC711B2343c17a6ABf4B2bAFaBb06957F; // InstaMemory Address
+        return 0x8a5419CfC711B2343c17a6ABf4B2bAFaBb06957F; // layerMemory Address
     }
 
     /**
-     * @dev Get Uint value from InstaMemory Contract.
+     * @dev Get Uint value from layerMemory Contract.
     */
     function getUint(uint getId, uint val) internal returns (uint returnVal) {
         returnVal = getId == 0 ? val : MemoryInterface(getMemoryAddr()).getUint(getId);
     }
 
     /**
-     * @dev Set Uint value in InstaMemory Contract.
+     * @dev Set Uint value in layerMemory Contract.
     */
     function setUint(uint setId, uint val) internal {
         if (setId != 0) MemoryInterface(getMemoryAddr()).setUint(setId, val);
@@ -121,10 +121,10 @@ contract CompoundHelpers is Helpers {
     }
 
     /**
-     * @dev Return InstaDApp Mapping Addresses
+     * @dev Return layerDApp Mapping Addresses
      */
     function getMappingAddr() internal pure returns (address) {
-        return 0xe81F70Cc7C0D46e12d70efc60607F16bbD617E88; // InstaMapping Address
+        return 0xe81F70Cc7C0D46e12d70efc60607F16bbD617E88; // layerMapping Address
     }
 
     /**
@@ -158,8 +158,8 @@ contract BasicResolver is CompoundHelpers {
      * @dev Deposit ETH/ERC20_Token.
      * @param token token address to deposit.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param amt token amount to deposit.
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
+     * @param getId Get token amount at this ID from `layerMemory` Contract.
+     * @param setId Set token amount at this ID in `layerMemory` Contract.
     */
     function deposit(
         address token,
@@ -168,14 +168,14 @@ contract BasicResolver is CompoundHelpers {
         uint setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
-        address cToken = InstaMapping(getMappingAddr()).cTokenMapping(token);
+        address cToken = layerMapping(getMappingAddr()).cTokenMapping(token);
         enterMarket(cToken);
         if (token == getAddressETH()) {
-            _amt = _amt == uint(-1) ? address(this).balance : _amt;
+            _amt = _amt == type(uint256).max ? address(this).balance : _amt;
             CETHInterface(cToken).mint{value: _amt}();
         } else {
             TokenInterface tokenContract = TokenInterface(token);
-            _amt = _amt == uint(-1) ? tokenContract.balanceOf(address(this)) : _amt;
+            _amt = _amt == type(uint256).max ? tokenContract.balanceOf(address(this)) : _amt;
             tokenContract.approve(cToken, _amt);
             require(CTokenInterface(cToken).mint(_amt) == 0, "deposit-failed");
         }
@@ -191,8 +191,8 @@ contract BasicResolver is CompoundHelpers {
      * @dev Withdraw ETH/ERC20_Token.
      * @param token token address to withdraw.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param amt token amount to withdraw.
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
+     * @param getId Get token amount at this ID from `layerMemory` Contract.
+     * @param setId Set token amount at this ID in `layerMemory` Contract.
     */
     function withdraw(
         address token,
@@ -201,9 +201,9 @@ contract BasicResolver is CompoundHelpers {
         uint setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
-        address cToken = InstaMapping(getMappingAddr()).cTokenMapping(token);
+        address cToken = layerMapping(getMappingAddr()).cTokenMapping(token);
         CTokenInterface cTokenContract = CTokenInterface(cToken);
-        if (_amt == uint(-1)) {
+        if (_amt == type(uint256).max) {
             TokenInterface tokenContract = TokenInterface(token);
             uint initialBal = token == getAddressETH() ? address(this).balance : tokenContract.balanceOf(address(this));
             require(cTokenContract.redeem(cTokenContract.balanceOf(address(this))) == 0, "full-withdraw-failed");
@@ -224,8 +224,8 @@ contract BasicResolver is CompoundHelpers {
      * @dev Borrow ETH/ERC20_Token.
      * @param token token address to borrow.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param amt token amount to borrow.
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
+     * @param getId Get token amount at this ID from `layerMemory` Contract.
+     * @param setId Set token amount at this ID in `layerMemory` Contract.
     */
     function borrow(
         address token,
@@ -234,7 +234,7 @@ contract BasicResolver is CompoundHelpers {
         uint setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
-        address cToken = InstaMapping(getMappingAddr()).cTokenMapping(token);
+        address cToken = layerMapping(getMappingAddr()).cTokenMapping(token);
         enterMarket(cToken);
         require(CTokenInterface(cToken).borrow(_amt) == 0, "borrow-failed");
         setUint(setId, _amt);
@@ -249,8 +249,8 @@ contract BasicResolver is CompoundHelpers {
      * @dev Payback borrowed ETH/ERC20_Token.
      * @param token token address to payback.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param amt token amount to payback.
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
+     * @param getId Get token amount at this ID from `layerMemory` Contract.
+     * @param setId Set token amount at this ID in `layerMemory` Contract.
     */
     function payback(
         address token,
@@ -259,9 +259,9 @@ contract BasicResolver is CompoundHelpers {
         uint setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
-        address cToken = InstaMapping(getMappingAddr()).cTokenMapping(token);
+        address cToken = layerMapping(getMappingAddr()).cTokenMapping(token);
         CTokenInterface cTokenContract = CTokenInterface(cToken);
-        _amt = _amt == uint(-1) ? cTokenContract.borrowBalanceCurrent(address(this)) : _amt;
+        _amt = _amt == type(uint256).max ? cTokenContract.borrowBalanceCurrent(address(this)) : _amt;
 
         if (token == getAddressETH()) {
             require(address(this).balance >= _amt, "not-enough-eth");

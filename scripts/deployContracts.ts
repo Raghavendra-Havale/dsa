@@ -1,49 +1,51 @@
 import hre from "hardhat";
 const { ethers } = hre;
 import addresses from "./constant/addresses";
-import instaDeployContract from "./deployContract";
+import layerDeployContract from "./deployContract";
 
 const networkType = process.env.networkType ?? "mainnet";
-const INSTA_INDEX = addresses.InstaIndex[networkType];
+const LAYER_INDEX = addresses.LayerIndex[networkType];
 
 export default async function () {
-  const instaIndex = await ethers.getContractAt("InstaIndex", INSTA_INDEX);
+  const layerIndex = await ethers.getContractAt("LayerIndex", LAYER_INDEX);
 
-  const instaConnectorsV2 = await instaDeployContract("InstaConnectorsV2", [
-    instaIndex.address,
+  // const layerIndex = await layerDeployContract("LayerIndex", []);
+
+  const layerConnectorsV2 = await layerDeployContract("LayerConnectorsV2", [
+    layerIndex.address,
   ]);
 
-  const implementationsMapping = await instaDeployContract(
-    "InstaImplementations",
-    [instaIndex.address]
+  const implementationsMapping = await layerDeployContract(
+    "LayerImplementations",
+    [layerIndex.address]
   );
 
-  const instaAccountV2Proxy = await instaDeployContract("InstaAccountV2", [
+  const layerAccountV2Proxy = await layerDeployContract("LayerAccountV2", [
     implementationsMapping.address,
   ]);
 
-  const instaAccountV2DefaultImpl = await instaDeployContract(
-    "InstaDefaultImplementation",
-    [instaIndex.address]
+  const layerAccountV2DefaultImpl = await layerDeployContract(
+    "LayerDefaultImplementation",
+    [layerIndex.address]
   );
 
-  const instaAccountV2ImplM1 = await instaDeployContract(
-    "InstaImplementationM1",
-    [instaIndex.address, instaConnectorsV2.address]
+  const layerAccountV2ImplM1 = await layerDeployContract(
+    "LayerImplementationM1",
+    [layerIndex.address, layerConnectorsV2.address]
   );
 
-  const instaAccountV2ImplM2 = await instaDeployContract(
-    "InstaImplementationM2",
-    [instaIndex.address, instaConnectorsV2.address]
+  const layerAccountV2ImplM2 = await layerDeployContract(
+    "LayerImplementationM2",
+    [layerIndex.address, layerConnectorsV2.address]
   );
 
   return {
-    instaIndex,
-    instaConnectorsV2,
+    layerIndex,
+    layerConnectorsV2,
     implementationsMapping,
-    instaAccountV2Proxy,
-    instaAccountV2DefaultImpl,
-    instaAccountV2ImplM1,
-    instaAccountV2ImplM2,
+    layerAccountV2Proxy,
+    layerAccountV2DefaultImpl,
+    layerAccountV2ImplM1,
+    layerAccountV2ImplM2,
   };
 }

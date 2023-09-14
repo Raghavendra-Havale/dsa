@@ -1,4 +1,5 @@
-pragma solidity ^0.7.0;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 pragma experimental ABIEncoderV2;
 
 import { Variables } from "../variables.sol";
@@ -15,18 +16,18 @@ interface ListInterface {
 
 contract Constants is Variables {
     uint256 public constant implementationVersion = 1;
-    // InstaIndex Address.
-    address public immutable instaIndex;
+    // LayerIndex Address.
+    address public immutable layerIndex;
     // The Account Module Version.
     uint256 public constant version = 2;
 
-    constructor(address _instaIndex) {
-        instaIndex = _instaIndex;
+    constructor(address _layerIndex) {
+        layerIndex = _layerIndex;
     }
 }
 
 contract Record is Constants {
-    constructor(address _instaIndex) Constants(_instaIndex) {}
+    constructor(address _layerIndex) Constants(_layerIndex) {}
 
     event LogEnableUser(address indexed user);
     event LogDisableUser(address indexed user);
@@ -53,13 +54,13 @@ contract Record is Constants {
      */
     function enable(address user) public {
         require(
-            msg.sender == address(this) || msg.sender == instaIndex,
+            msg.sender == address(this) || msg.sender == layerIndex,
             "not-self-index"
         );
         require(user != address(0), "not-valid");
         require(!_auth[user], "already-enabled");
         _auth[user] = true;
-        ListInterface(IndexInterface(instaIndex).list()).addAuth(user);
+        ListInterface(IndexInterface(layerIndex).list()).addAuth(user);
         emit LogEnableUser(user);
     }
 
@@ -72,7 +73,7 @@ contract Record is Constants {
         require(user != address(0), "not-valid");
         require(_auth[user], "already-disabled");
         delete _auth[user];
-        ListInterface(IndexInterface(instaIndex).list()).removeAuth(user);
+        ListInterface(IndexInterface(layerIndex).list()).removeAuth(user);
         emit LogDisableUser(user);
     }
 
@@ -121,8 +122,8 @@ contract Record is Constants {
     }
 }
 
-contract InstaDefaultImplementation is Record {
-    constructor(address _instaIndex) public Record(_instaIndex) {}
+contract LayerDefaultImplementation is Record {
+    constructor(address _layerIndex) public Record(_layerIndex) {}
 
     receive() external payable {}
 }

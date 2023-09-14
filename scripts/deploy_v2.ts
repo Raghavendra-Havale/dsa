@@ -4,7 +4,7 @@ import addresses from "./constant/addresses";
 import instaDeployContract from "./deployContract";
 
 const networkType = String(process.env.networkType) ?? "mainnet";
-const INSTA_INDEX = addresses.InstaIndex[networkType];
+const INSTA_INDEX = addresses.LayerIndex[networkType];
 
 async function main() {
   const instaConnectorsV2Impl = await instaDeployContract(

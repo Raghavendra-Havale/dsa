@@ -1,15 +1,15 @@
-pragma solidity ^0.7.0;
+pragma solidity ^0.8.0;
 pragma experimental ABIEncoderV2;
 
 /**
- * @title Test InstaAccount.
+ * @title Test LayerAccount.
  * @dev DeFi Smart Account Wallet.
  */
 
 contract Record {
-    uint256 public constant version = 3;
+    uint256 public constant version = 4;
 }
 
-contract InstaAccountV3 is Record {
+contract LayerAccountV4 is Record {
     receive() external payable {}
 }

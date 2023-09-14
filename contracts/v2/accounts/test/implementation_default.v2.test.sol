@@ -1,4 +1,5 @@
-pragma solidity ^0.7.0;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 
 pragma experimental ABIEncoderV2;
 
@@ -18,8 +19,8 @@ interface ListInterface {
 
 contract CommonSetup {
     uint256 public constant implementationVersion = 2;
-    // InstaIndex Address.
-    address public constant instaIndex =
+    // layerIndex Address.
+    address public constant layerIndex =
         0x2971AdFa57b20E5a416aE5a708A8655A9c74f723;
     // The Account Module Version.
     uint256 public constant version = 2;
@@ -70,14 +71,14 @@ contract Record is CommonSetup {
     function enable(address user) public {
         require(
             msg.sender == address(this) ||
-                msg.sender == instaIndex ||
+                msg.sender == layerIndex ||
                 isAuth(msg.sender),
             "not-self-index"
         );
         require(user != address(0), "not-valid");
         require(!auth[user], "already-enabled");
         auth[user] = true;
-        ListInterface(IndexInterface(instaIndex).list()).addAuth(user);
+        ListInterface(IndexInterface(layerIndex).list()).addAuth(user);
         emit LogEnableUser(user);
     }
 
@@ -90,7 +91,7 @@ contract Record is CommonSetup {
         require(user != address(0), "not-valid");
         require(auth[user], "already-disabled");
         delete auth[user];
-        ListInterface(IndexInterface(instaIndex).list()).removeAuth(user);
+        ListInterface(IndexInterface(layerIndex).list()).removeAuth(user);
         emit LogDisableUser(user);
     }
 
@@ -102,6 +103,6 @@ contract Record is CommonSetup {
     }
 }
 
-contract InstaDefaultImplementationV2 is Record {
+contract LayerDefaultImplementationV2 is Record {
     receive() external payable {}
 }

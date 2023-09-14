@@ -1,4 +1,5 @@
-pragma solidity ^0.7.0;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 pragma experimental ABIEncoderV2;
 
 /**
@@ -20,10 +21,10 @@ contract CommonSetup {
 }
 
 contract Record is CommonSetup {
-    address public immutable instaIndex;
+    address public immutable layerIndex;
 
-    constructor(address _instaIndex) {
-        instaIndex = _instaIndex;
+    constructor(address _layerIndex) {
+        layerIndex = _layerIndex;
     }
 
     event LogEnableUser(address indexed user);
@@ -39,6 +40,6 @@ contract Record is CommonSetup {
     }
 }
 
-contract InstaImplementationM0Test is Record {
-    constructor(address _instaIndex) Record(_instaIndex) {}
+contract LayerImplementationM0Test is Record {
+    constructor(address _layerIndex) Record(_layerIndex) {}
 }
