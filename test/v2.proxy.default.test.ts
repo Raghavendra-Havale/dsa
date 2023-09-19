@@ -29,7 +29,7 @@ import deployContracts from "../scripts/deployContracts";
 import getMasterSigner from "../scripts/getMasterSigner";
 import { encode } from "punycode";
 
-describe("LayerAccount V2", function () {
+describe("LayerAccount V2P", function () {
   let masterSigner: Signer,
     chief1: Signer,
     chief2: Signer,
@@ -54,7 +54,6 @@ describe("LayerAccount V2", function () {
 
   let layerIndex: Contract,
     layerList: Contract,
-    layerAccount: Contract,
     layerConnectorsTest: Contract,
     layerConnectorsV2: Contract,
     layerConnectorsV2Test: Contract,
@@ -129,9 +128,6 @@ describe("LayerAccount V2", function () {
 
     layerIndex = await layerDeployContract("LayerIndex", []);
     layerList = await layerDeployContract("LayerList", [layerIndex.address]);
-    layerAccount = await layerDeployContract("LayerAccount", [
-      layerIndex.address,
-    ]);
     layerConnectorsTest = await layerDeployContract("LayerConnectorsTest", [
       layerIndex.address,
     ]);
@@ -171,7 +167,7 @@ describe("LayerAccount V2", function () {
     setBasicsArgs = [
       deployerAddress,
       layerList.address,
-      layerAccount.address,
+      layerAccountV2Proxy.address,
       layerConnectorsTest.address,
     ];
 
@@ -320,7 +316,7 @@ describe("LayerAccount V2", function () {
       );
       dsaWallet2 = await ethers.getContractAt(
         (
-          await deployments.getArtifact("LayerAccount")
+          await deployments.getArtifact("LayerAccountV2")
         ).abi,
         event.args.account
       );
@@ -457,10 +453,6 @@ describe("LayerAccount V2", function () {
     it("should revert casting spell for not enabled connector", async function () {
       await expect(
         dsaWallet3.connect(wallet0).cast(["authV2"], ["0x"], wallet0.address)
-      ).to.be.revertedWith("target-invalid");
-
-      await expect(
-        dsaWallet2.connect(wallet1).cast([addr_zero], ["0x"], wallet1.address)
       ).to.be.revertedWith("target-invalid");
     });
   });

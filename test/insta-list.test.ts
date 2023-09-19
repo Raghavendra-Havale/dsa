@@ -17,8 +17,7 @@ describe("LayerList", function () {
 
   let layerIndex: Contract,
     layerList: Contract,
-    layerConnectors: Contract,
-    layerAccount: Contract,
+    layerAccountV2Proxy: Contract,
     layerDefaultAccountV2: Contract,
     layerConnectorsV2: Contract;
 
@@ -63,11 +62,7 @@ describe("LayerList", function () {
 
     layerList = await layerDeployContract("LayerList", [layerIndex.address]);
 
-    layerAccount = await layerDeployContract("LayerAccount", [
-      layerIndex.address,
-    ]);
-
-    layerConnectors = await layerDeployContract("LayerConnectors", [
+    layerAccountV2Proxy = await layerDeployContract("LayerAccountV2", [
       layerIndex.address,
     ]);
 
@@ -83,8 +78,8 @@ describe("LayerList", function () {
     setBasicsArgs = [
       deployerAddress,
       layerList.address,
-      layerAccount.address,
-      layerConnectors.address,
+      layerAccountV2Proxy.address,
+      layerConnectorsV2.address,
     ];
 
     await hre.network.provider.request({
@@ -98,8 +93,8 @@ describe("LayerList", function () {
   it("should have the contracts deployed", async function () {
     expect(!!layerIndex.address).to.be.true;
     expect(!!layerList.address).to.be.true;
-    expect(!!layerAccount.address).to.be.true;
-    expect(!!layerConnectors.address).to.be.true;
+    expect(!!layerAccountV2Proxy.address).to.be.true;
+    expect(!!layerConnectorsV2.address).to.be.true;
   });
 
   it("should set the basics", async function () {
@@ -146,7 +141,7 @@ describe("LayerList", function () {
   });
 
   it("Should build DSAs", async () => {
-    dsaWalletv1 = await buildDSA(wallet0.address, 1);
+    dsaWalletv1 = await buildDSA(wallet0.address, 2);
     expect(!!dsaWalletv1.address).to.be.true;
     walletv1 = await ethers.getSigner(dsaWalletv1.address);
     dsaWalletv2 = await buildDSA(wallet0.address, 2);
@@ -163,7 +158,7 @@ describe("LayerList", function () {
     });
     dsaV2 = ethers.provider.getSigner(walletv2.address);
 
-    dsaWalletv0 = await buildDSA(wallet1.address, 1);
+    dsaWalletv0 = await buildDSA(wallet1.address, 2);
     expect(!!dsaWalletv0.address).to.be.true;
   });
 
@@ -293,8 +288,8 @@ describe("LayerList", function () {
       expect(!!txDetails.status).to.be.true;
       expectEvent(
         txDetails,
-        (await deployments.getArtifact("LayerAccount")).abi,
-        "LogEnable",
+        (await deployments.getArtifact("LayerDefaultImplementation")).abi,
+        "LogEnableUser",
         {
           user: wallet1.address,
         }
@@ -302,7 +297,7 @@ describe("LayerList", function () {
     });
 
     it("should build dsa with wallet1 as auth", async function () {
-      dsaWalletv3 = await buildDSA(wallet1.address, 1);
+      dsaWalletv3 = await buildDSA(wallet1.address, 2);
       expect(!!dsaWalletv3.address).to.be.true;
     });
 
@@ -364,8 +359,8 @@ describe("LayerList", function () {
       expect(!!txDetails.status).to.be.true;
       expectEvent(
         txDetails,
-        (await deployments.getArtifact("LayerAccount")).abi,
-        "LogEnable",
+        (await deployments.getArtifact("LayerDefaultImplementation")).abi,
+        "LogEnableUser",
         {
           user: dsaWalletv2.address,
         }
@@ -429,8 +424,8 @@ describe("LayerList", function () {
       expect(!!txDetails.status).to.be.true;
       expectEvent(
         txDetails,
-        (await deployments.getArtifact("LayerAccount")).abi,
-        "LogDisable",
+        (await deployments.getArtifact("LayerDefaultImplementation")).abi,
+        "LogDisableUser",
         {
           user: wallet1.address,
         }
@@ -492,8 +487,8 @@ describe("LayerList", function () {
       expect(!!txDetails.status).to.be.true;
       expectEvent(
         txDetails,
-        (await deployments.getArtifact("LayerAccount")).abi,
-        "LogDisable",
+        (await deployments.getArtifact("LayerDefaultImplementation")).abi,
+        "LogDisableUser",
         {
           user: wallet0.address,
         }
@@ -508,8 +503,8 @@ describe("LayerList", function () {
       expect(!!txDetails.status).to.be.true;
       expectEvent(
         txDetails,
-        (await deployments.getArtifact("LayerAccount")).abi,
-        "LogEnable",
+        (await deployments.getArtifact("LayerDefaultImplementation")).abi,
+        "LogEnableUser",
         {
           user: wallet0.address,
         }
@@ -523,8 +518,8 @@ describe("LayerList", function () {
       expect(!!txDetails.status).to.be.true;
       expectEvent(
         txDetails,
-        (await deployments.getArtifact("LayerAccount")).abi,
-        "LogDisable",
+        (await deployments.getArtifact("LayerDefaultImplementation")).abi,
+        "LogDisableUser",
         {
           user: wallet0.address,
         }

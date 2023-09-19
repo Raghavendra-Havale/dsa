@@ -53,8 +53,6 @@ describe("LayerAccount V2", function () {
 
   let layerIndex: Contract,
     layerList: Contract,
-    layerAccount: Contract,
-    layerConnectors: Contract,
     layerConnectorsV2: Contract,
     implementationsMapping: Contract,
     layerAccountV2Proxy: Contract,
@@ -127,12 +125,6 @@ describe("LayerAccount V2", function () {
 
     layerIndex = await layerDeployContract("LayerIndex", []);
     layerList = await layerDeployContract("LayerList", [layerIndex.address]);
-    layerAccount = await layerDeployContract("LayerAccount", [
-      layerIndex.address,
-    ]);
-    layerConnectors = await layerDeployContract("LayerConnectors", [
-      layerIndex.address,
-    ]);
 
     layerConnectorsV2 = await layerDeployContract("LayerConnectorsV2", [
       layerIndex.address,
@@ -164,8 +156,8 @@ describe("LayerAccount V2", function () {
     setBasicsArgs = [
       deployerAddress,
       layerList.address,
-      layerAccount.address,
-      layerConnectors.address,
+      layerAccountV2Proxy.address,
+      layerConnectorsV2.address,
     ];
 
     await hre.network.provider.request({
