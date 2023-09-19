@@ -104,7 +104,7 @@ contract Auth is Helpers {
 }
 
 
-contract ConnectV2Auth is Auth {
+contract ConnectAuth is Auth {
     constructor(address _layerList) Auth(_layerList) {}
     string public constant name = "Auth-v1";
 }

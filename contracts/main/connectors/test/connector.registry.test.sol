@@ -56,7 +56,7 @@ contract Controllers {
     }
 }
 
-contract LayerConnectorsV2Test is Controllers {
+contract LayerConnectors2Test is Controllers {
     event LogConnectorAdded(
         bytes32 indexed connectorNameHash,
         string connectorName,

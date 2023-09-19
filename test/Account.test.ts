@@ -16,9 +16,9 @@ import BigNumber from "bignumber.js";
 import deployConnector from "../scripts/deployConnector";
 
 import {
-  ConnectV2Auth__factory,
-  LayerDefaultImplementationV2__factory,
-  ConnectV2EmitEvent__factory,
+  ConnectAuth__factory,
+  LayerDefaultImplementation2__factory,
+  ConnectEmitEvent__factory,
   NFTTest__factory,
 } from "../typechain";
 import addresses from "../scripts/constant/addresses";
@@ -49,7 +49,7 @@ describe("LayerAccount V2", function () {
   let masterAddress: Address;
   let setBasicsArgs: any;
 
-  let layerAuthV2: Contract, layerEventV2: Contract;
+  let layerAuth: Contract, layerEvent: Contract;
 
   let layerIndex: Contract,
     layerList: Contract,
@@ -60,7 +60,7 @@ describe("LayerAccount V2", function () {
     layerAccountV2ImplM2: Contract,
     layerAccountV2ImplM0: Contract,
     layerAccountV2DefaultImpl: Contract,
-    layerAccountV2DefaultImplV2: Contract;
+    layerAccount2DefaultImpl2: Contract;
 
   const addr_zero = ethers.constants.AddressZero;
   const maxValue = ethers.constants.MaxUint256;
@@ -86,7 +86,7 @@ describe("LayerAccount V2", function () {
     "onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)",
   ].map((a) => web3.utils.keccak256(a).slice(0, 10));
 
-  const layerAccountV2DefaultImplV2Sigs = [
+  const layerAccount2DefaultImpl2Sigs = [
     "isAuth(address)",
     "switchShield(bool)",
     "editCheckMapping(address,bool)",
@@ -167,8 +167,8 @@ describe("LayerAccount V2", function () {
 
     masterSigner = ethers.provider.getSigner(masterAddress);
 
-    layerAccountV2DefaultImplV2 = await layerDeployContract(
-      "LayerDefaultImplementationV2",
+    layerAccount2DefaultImpl2 = await layerDeployContract(
+      "LayerDefaultImplementation2",
       []
     );
 
@@ -200,7 +200,7 @@ describe("LayerAccount V2", function () {
     expect(!!layerConnectors.address).to.be.true;
     expect(!!implementationsMapping.address).to.be.true;
     expect(!!layerAccountV2DefaultImpl.address).to.be.true;
-    expect(!!layerAccountV2DefaultImplV2.address).to.be.true;
+    expect(!!layerAccount2DefaultImpl2.address).to.be.true;
     expect(!!layerAccountProxy.address).to.be.true;
     expect(!!layerAccountV2ImplM1.address).to.be.true;
     expect(!!layerAccountV2ImplM2.address).to.be.true;
@@ -408,30 +408,30 @@ describe("LayerAccount V2", function () {
       const tx = await implementationsMapping
         .connect(masterSigner)
         .addImplementation(
-          layerAccountV2DefaultImplV2.address,
-          layerAccountV2DefaultImplV2Sigs
+          layerAccount2DefaultImpl2.address,
+          layerAccount2DefaultImpl2Sigs
         );
       let receipt = await tx.wait();
 
       expect(receipt.events[0].event).to.be.equal("LogAddImplementation");
       expect(receipt.events[0].args.implementation).to.be.equal(
-        layerAccountV2DefaultImplV2.address
+        layerAccount2DefaultImpl2.address
       );
       receipt.events[0].args.sigs.forEach((a: any, i: string | number) => {
-        expect(a).to.be.equal(layerAccountV2DefaultImplV2Sigs[i]);
+        expect(a).to.be.equal(layerAccount2DefaultImpl2Sigs[i]);
       });
 
       expect(
         await implementationsMapping.getSigImplementation(
-          layerAccountV2DefaultImplV2Sigs[0]
+          layerAccount2DefaultImpl2Sigs[0]
         )
-      ).to.be.equal(layerAccountV2DefaultImplV2.address);
+      ).to.be.equal(layerAccount2DefaultImpl2.address);
       (
         await implementationsMapping.getImplementationSigs(
-          layerAccountV2DefaultImplV2.address
+          layerAccount2DefaultImpl2.address
         )
       ).forEach((a: any, i: string | number) => {
-        expect(a).to.be.eq(layerAccountV2DefaultImplV2Sigs[i]);
+        expect(a).to.be.eq(layerAccount2DefaultImpl2Sigs[i]);
       });
     });
 
@@ -457,7 +457,7 @@ describe("LayerAccount V2", function () {
       await expect(
         implementationsMapping
           .connect(signer)
-          .removeImplementation(layerAccountV2DefaultImplV2.address)
+          .removeImplementation(layerAccount2DefaultImpl2.address)
       ).to.be.revertedWith("Implementations: not-master");
     });
 
@@ -477,26 +477,26 @@ describe("LayerAccount V2", function () {
     it("should remove defaultImplementationM2 from mapping", async function () {
       const tx = await implementationsMapping
         .connect(masterSigner)
-        .removeImplementation(layerAccountV2DefaultImplV2.address);
+        .removeImplementation(layerAccount2DefaultImpl2.address);
       let receipt = await tx.wait();
 
       expect(receipt.events[0].event).to.be.equal("LogRemoveImplementation");
       expect(receipt.events[0].args.implementation).to.be.equal(
-        layerAccountV2DefaultImplV2.address
+        layerAccount2DefaultImpl2.address
       );
       receipt.events[0].args.sigs.forEach((a: any, i: string | number) => {
-        expect(a).to.be.equal(layerAccountV2DefaultImplV2Sigs[i]);
+        expect(a).to.be.equal(layerAccount2DefaultImpl2Sigs[i]);
       });
 
       expect(
         await implementationsMapping.getSigImplementation(
-          layerAccountV2DefaultImplV2Sigs[0]
+          layerAccount2DefaultImpl2Sigs[0]
         )
       ).to.be.equal(addr_zero);
 
       (
         await implementationsMapping.getImplementationSigs(
-          layerAccountV2DefaultImplV2.address
+          layerAccount2DefaultImpl2.address
         )
       ).forEach((a: any, i: string | number) => {
         expect(a).to.be.eq(0);
@@ -506,7 +506,7 @@ describe("LayerAccount V2", function () {
     it("should change default implementation", async function () {
       let tx = await implementationsMapping
         .connect(masterSigner)
-        .setDefaultImplementation(layerAccountV2DefaultImplV2.address);
+        .setDefaultImplementation(layerAccount2DefaultImpl2.address);
       let txDetails = await tx.wait();
       expect(!!txDetails.status).to.be.true;
 
@@ -516,21 +516,21 @@ describe("LayerAccount V2", function () {
         "LogSetDefaultImplementation",
         {
           oldImplementation: layerAccountV2DefaultImpl.address,
-          newImplementation: layerAccountV2DefaultImplV2.address,
+          newImplementation: layerAccount2DefaultImpl2.address,
         }
       );
 
       expect(await implementationsMapping.defaultImplementation()).to.be.equal(
-        layerAccountV2DefaultImplV2.address
+        layerAccount2DefaultImpl2.address
       );
     });
 
     it("should return default implementation v2", async function () {
       expect(
         await implementationsMapping.getImplementation(
-          layerAccountV2DefaultImplV2Sigs[1]
+          layerAccount2DefaultImpl2Sigs[1]
         )
-      ).to.be.equal(layerAccountV2DefaultImplV2.address);
+      ).to.be.equal(layerAccount2DefaultImpl2.address);
     });
 
     after(async () => {
@@ -585,7 +585,7 @@ describe("LayerAccount V2", function () {
         await deployments.getArtifact("LayerDefaultImplementation")
       ).abi;
       let defaultM2abi = await deployments.getArtifact(
-        "LayerDefaultImplementationV2"
+        "LayerDefaultImplementation2"
       );
       let implM2abi = await deployments.getArtifact("LayerImplementationM2");
 
@@ -636,7 +636,7 @@ describe("LayerAccount V2", function () {
   });
 
   describe("Connector Registry", async function () {
-    let connectorNames = ["authV2", "emitEvent"];
+    let connectorNames = ["auth", "emitEvent"];
     let authAddr = "0x351Bb32e90C35647Df7a584f3c1a3A0c38F31c68";
 
     it("should toggle chief", async function () {
@@ -706,53 +706,53 @@ describe("LayerAccount V2", function () {
     it("should deploy Auth and EmitEvent connectors", async function () {
       await deployConnector(
         {
-          connectorName: "authV2",
-          contract: "ConnectV2Auth",
-          factory: ConnectV2Auth__factory,
+          connectorName: "auth",
+          contract: "ConnectAuth",
+          factory: ConnectAuth__factory,
         },
         [layerList.address]
       );
-      expect(!!addresses.connectors["authV2"]).to.be.true;
-      layerAuthV2 = await ethers.getContractAt(
+      expect(!!addresses.connectors["auth"]).to.be.true;
+      layerAuth = await ethers.getContractAt(
         (
-          await deployments.getArtifact("ConnectV2Auth")
+          await deployments.getArtifact("ConnectAuth")
         ).abi,
-        addresses.connectors["authV2"]
+        addresses.connectors["auth"]
       );
 
       await deployConnector({
         connectorName: "emitEvent",
-        contract: "ConnectV2EmitEvent",
-        factory: ConnectV2EmitEvent__factory,
+        contract: "ConnectEmitEvent",
+        factory: ConnectEmitEvent__factory,
       });
       expect(!!addresses.connectors["emitEvent"]).to.be.true;
-      layerEventV2 = await ethers.getContractAt(
+      layerEvent = await ethers.getContractAt(
         (
-          await deployments.getArtifact("ConnectV2EmitEvent")
+          await deployments.getArtifact("ConnectEmitEvent")
         ).abi,
         addresses.connectors["emitEvent"]
       );
 
       await deployConnector(
         {
-          connectorName: "authV2-a",
-          contract: "ConnectV2Auth",
-          factory: ConnectV2Auth__factory,
+          connectorName: "auth-a",
+          contract: "ConnectAuth",
+          factory: ConnectAuth__factory,
         },
         [layerList.address]
       );
-      expect(!!addresses.connectors["authV2-a"]).to.be.true;
+      expect(!!addresses.connectors["auth-a"]).to.be.true;
     });
 
     it("should revert adding connectors via non-chief or non-master", async function () {
-      expect(await layerConnectors.connectors("authV2")).to.be.equal(
+      expect(await layerConnectors.connectors("auth")).to.be.equal(
         addr_zero
       );
 
       await expect(
         layerConnectors
           .connect(signer)
-          .addConnectors(["authV2"], [layerAuthV2.address])
+          .addConnectors(["auth"], [layerAuth.address])
       ).to.be.revertedWith("not-an-chief");
     });
 
@@ -760,14 +760,14 @@ describe("LayerAccount V2", function () {
       expect(await layerConnectors.connectors("emitEvent")).to.be.equal(
         addr_zero
       );
-      expect(await layerConnectors.connectors("authV2")).to.be.equal(
+      expect(await layerConnectors.connectors("auth")).to.be.equal(
         addr_zero
       );
 
       await expect(
         layerConnectors
           .connect(chief1)
-          .addConnectors(["authV2", "emitEvent"], [layerAuthV2.address])
+          .addConnectors(["auth", "emitEvent"], [layerAuth.address])
       ).to.be.revertedWith("addConnectors: not same length");
     });
 
@@ -775,22 +775,22 @@ describe("LayerAccount V2", function () {
       expect(await layerConnectors.connectors("emitEvent")).to.be.equal(
         addr_zero
       );
-      expect(await layerConnectors.connectors("authV2")).to.be.equal(
+      expect(await layerConnectors.connectors("auth")).to.be.equal(
         addr_zero
       );
 
       await expect(
         layerConnectors
           .connect(chief1)
-          .addConnectors(["authV2", "emitEvent"], [addr_zero, addr_zero])
+          .addConnectors(["auth", "emitEvent"], [addr_zero, addr_zero])
       ).to.be.revertedWith("addConnectors: _connectors address not valid");
 
       await expect(
         layerConnectors
           .connect(chief1)
           .addConnectors(
-            ["authV2", "emitEvent"],
-            [layerAuthV2.address, addr_zero]
+            ["auth", "emitEvent"],
+            [layerAuth.address, addr_zero]
           )
       ).to.be.revertedWith("addConnectors: _connectors address not valid");
     });
@@ -799,7 +799,7 @@ describe("LayerAccount V2", function () {
       expect(await layerConnectors.connectors("emitEvent")).to.be.equal(
         addr_zero
       );
-      expect(await layerConnectors.connectors("authV2")).to.be.equal(
+      expect(await layerConnectors.connectors("auth")).to.be.equal(
         addr_zero
       );
 
@@ -807,8 +807,8 @@ describe("LayerAccount V2", function () {
         layerConnectors
           .connect(chief1)
           .addConnectors(
-            ["authV2", "authV2"],
-            [layerAuthV2.address, layerEventV2.address]
+            ["auth", "auth"],
+            [layerAuth.address, layerEvent.address]
           )
       ).to.be.revertedWith("addConnectors: _connectorName added already");
     });
@@ -819,7 +819,7 @@ describe("LayerAccount V2", function () {
       );
 
       await expect(
-        layerConnectors.connect(chief1).removeConnectors(["authV2"])
+        layerConnectors.connect(chief1).removeConnectors(["auth"])
       ).to.be.revertedWith(
         "removeConnectors: _connectorName not added to update"
       );
@@ -828,52 +828,52 @@ describe("LayerAccount V2", function () {
     it("should add Auth connector", async function () {
       let tx = await layerConnectors
         .connect(chief1)
-        .addConnectors(["authV2"], [layerAuthV2.address]);
+        .addConnectors(["auth"], [layerAuth.address]);
       let txDetails = await tx.wait();
       expect(!!txDetails.status).to.be.true;
 
       let events = txDetails.events;
       expect(events.length).to.be.equal(1);
       expect(events[0].args.connectorNameHash).to.be.equal(
-        web3.utils.keccak256("authV2")
+        web3.utils.keccak256("auth")
       );
-      expect(events[0].args.connectorName).to.be.equal("authV2");
-      expect(events[0].args.connector).to.be.equal(layerAuthV2.address);
-      expect(await layerConnectors.connectors("authV2")).to.be.eq(
-        layerAuthV2.address
+      expect(events[0].args.connectorName).to.be.equal("auth");
+      expect(events[0].args.connector).to.be.equal(layerAuth.address);
+      expect(await layerConnectors.connectors("auth")).to.be.eq(
+        layerAuth.address
       );
     });
 
     it("should revert disabling connectors with non-chief or non-master", async function () {
-      expect(await layerConnectors.connectors("authV2")).to.be.equal(
-        layerAuthV2.address
+      expect(await layerConnectors.connectors("auth")).to.be.equal(
+        layerAuth.address
       );
 
       await expect(
-        layerConnectors.connect(signer).removeConnectors(["authV2"])
+        layerConnectors.connect(signer).removeConnectors(["auth"])
       ).to.be.revertedWith("not-an-chief");
     });
 
     it("should remove auth connector", async function () {
       let tx = await layerConnectors
         .connect(masterSigner)
-        .removeConnectors(["authV2"]);
+        .removeConnectors(["auth"]);
       let receipt = await tx.wait();
       expect(!!receipt.status).to.be.true;
 
       let events = receipt.events;
       expect(events[0].args.connectorNameHash).to.be.equal(
-        web3.utils.keccak256("authV2")
+        web3.utils.keccak256("auth")
       );
-      expect(events[0].args.connectorName).to.be.equal("authV2");
-      expect(events[0].args.connector).to.be.equal(layerAuthV2.address);
-      expect(await layerConnectors.connectors("authV2")).to.be.equal(
+      expect(events[0].args.connectorName).to.be.equal("auth");
+      expect(events[0].args.connector).to.be.equal(layerAuth.address);
+      expect(await layerConnectors.connectors("auth")).to.be.equal(
         addr_zero
       );
     });
 
     it("should add multiple connectors", async function () {
-      let address = [layerAuthV2.address, layerEventV2.address];
+      let address = [layerAuth.address, layerEvent.address];
       let tx = await layerConnectors
         .connect(chief1)
         .addConnectors(connectorNames, address);
@@ -899,7 +899,7 @@ describe("LayerAccount V2", function () {
     });
 
     it("should remove multiple connectors", async function () {
-      let address = [layerAuthV2.address, layerEventV2.address];
+      let address = [layerAuth.address, layerEvent.address];
       let tx = await layerConnectors
         .connect(chief1)
         .removeConnectors(connectorNames);
@@ -929,18 +929,18 @@ describe("LayerAccount V2", function () {
       await expect(
         layerConnectors
           .connect(chief1)
-          .updateConnectors(["authV2"], [authAddr])
+          .updateConnectors(["auth"], [authAddr])
       ).to.be.revertedWith(
         "updateConnectors: _connectorName not added to update"
       );
     });
 
     it("can add same address to multiple connector names", async function () {
-      connectorNames = ["authV2", "emitEvent", "authV2-a"];
+      connectorNames = ["auth", "emitEvent", "auth-a"];
       let connectors = [
-        layerAuthV2.address,
-        layerEventV2.address,
-        layerAuthV2.address,
+        layerAuth.address,
+        layerEvent.address,
+        layerAuth.address,
       ];
 
       let tx = await layerConnectors
@@ -969,13 +969,13 @@ describe("LayerAccount V2", function () {
       await expect(
         layerConnectors
           .connect(chief1)
-          .updateConnectors(["authV2", "authV2-a"], [addr_zero, addr_zero])
+          .updateConnectors(["auth", "auth-a"], [addr_zero, addr_zero])
       ).to.be.revertedWith("updateConnectors: _connector address is not valid");
 
       await expect(
         layerConnectors
           .connect(chief1)
-          .updateConnectors(["authV2", "authV2-a"], [authAddr, addr_zero])
+          .updateConnectors(["auth", "auth-a"], [authAddr, addr_zero])
       ).to.be.revertedWith("updateConnectors: _connector address is not valid");
     });
 
@@ -983,17 +983,17 @@ describe("LayerAccount V2", function () {
       await expect(
         layerConnectors
           .connect(chief1)
-          .updateConnectors(["authV2", "authV2-a"], [authAddr])
+          .updateConnectors(["auth", "auth-a"], [authAddr])
       ).to.be.revertedWith("updateConnectors: not same length");
     });
 
     it("should update the connector address", async function () {
       let tx = await layerConnectors
         .connect(chief1)
-        .updateConnectors(["authV2-a"], [authAddr]);
+        .updateConnectors(["auth-a"], [authAddr]);
       let receipt = await tx.wait();
       expect(!!receipt.status).to.be.true;
-      addresses.connectors["authV2-a"] = authAddr;
+      addresses.connectors["auth-a"] = authAddr;
 
       let [ok, connectors] = await layerConnectors.isConnectors(
         connectorNames
@@ -1008,7 +1008,7 @@ describe("LayerAccount V2", function () {
   describe("Cast spells", function () {
     let spell = [
       {
-        connector: "authV2",
+        connector: "auth",
         method: "add",
         args: [wallet1.address],
       },
@@ -1028,22 +1028,22 @@ describe("LayerAccount V2", function () {
     });
 
     it("should revert if length of datas and targets is unequal", async function () {
-      let targets = ["authV2"];
+      let targets = ["auth"];
       await expect(
         dsaWallet0.connect(wallet0).cast(targets, [], wallet0.address)
       ).to.be.revertedWith("1: array-length-invalid");
     });
 
     it("it should revert on casting on invalid connectors", async function () {
-      expect(await layerConnectors.connectors("authV2-b")).to.be.equal(
+      expect(await layerConnectors.connectors("auth-b")).to.be.equal(
         addr_zero
       );
 
-      let target = ["authV2-b"];
+      let target = ["auth-b"];
 
       spell = [
         {
-          connector: "authV2",
+          connector: "auth",
           method: "add",
           args: [wallet1.address],
         },
@@ -1061,7 +1061,7 @@ describe("LayerAccount V2", function () {
 
         let spells = [
           {
-            connector: "authV2",
+            connector: "auth",
             method: "add",
             args: [wallet1.address],
           },
@@ -1083,7 +1083,7 @@ describe("LayerAccount V2", function () {
         );
         expectEvent(
           receipt,
-          (await deployments.getArtifact("ConnectV2Auth")).abi,
+          (await deployments.getArtifact("ConnectAuth")).abi,
           "LogAddAuth",
           {
             _msgSender: wallet0.address,
@@ -1101,9 +1101,9 @@ describe("LayerAccount V2", function () {
           }
         );
 
-        expect(receipt.events[2].args.targetsNames[0]).to.be.equal("authV2");
+        expect(receipt.events[2].args.targetsNames[0]).to.be.equal("auth");
         expect(receipt.events[2].args.targets[0]).to.be.equal(
-          layerAuthV2.address
+          layerAuth.address
         );
         expect(receipt.events[2].args.eventNames[0]).to.be.equal(
           "LogAddAuth(address,address)"
@@ -1128,7 +1128,7 @@ describe("LayerAccount V2", function () {
 
         let spells = [
           {
-            connector: "authV2",
+            connector: "auth",
             method: "remove",
             args: [wallet1.address],
           },
@@ -1148,7 +1148,7 @@ describe("LayerAccount V2", function () {
         );
         expectEvent(
           receipt,
-          (await deployments.getArtifact("ConnectV2Auth")).abi,
+          (await deployments.getArtifact("ConnectAuth")).abi,
           "LogRemoveAuth",
           {
             _msgSender: wallet0.address,
@@ -1166,9 +1166,9 @@ describe("LayerAccount V2", function () {
           }
         );
 
-        expect(receipt.events[2].args.targetsNames[0]).to.be.equal("authV2");
+        expect(receipt.events[2].args.targetsNames[0]).to.be.equal("auth");
         expect(receipt.events[2].args.targets[0]).to.be.equal(
-          layerAuthV2.address
+          layerAuth.address
         );
         expect(receipt.events[2].args.eventNames[0]).to.be.equal(
           "LogRemoveAuth(address,address)"
@@ -1184,7 +1184,7 @@ describe("LayerAccount V2", function () {
       it("should revert disabling all auths", async function () {
         let spells = [
           {
-            connector: "authV2",
+            connector: "auth",
             method: "remove",
             args: [wallet0.address],
           },
@@ -1201,12 +1201,12 @@ describe("LayerAccount V2", function () {
           .false;
         let spells = [
           {
-            connector: "authV2",
+            connector: "auth",
             method: "add",
             args: [wallet1.address],
           },
           {
-            connector: "authV2",
+            connector: "auth",
             method: "remove",
             args: [wallet1.address],
           },
@@ -1229,7 +1229,7 @@ describe("LayerAccount V2", function () {
         );
         expectEvent(
           receipt,
-          (await deployments.getArtifact("ConnectV2Auth")).abi,
+          (await deployments.getArtifact("ConnectAuth")).abi,
           "LogAddAuth",
           {
             _msgSender: wallet0.address,
@@ -1246,7 +1246,7 @@ describe("LayerAccount V2", function () {
         );
         expectEvent(
           receipt,
-          (await deployments.getArtifact("ConnectV2Auth")).abi,
+          (await deployments.getArtifact("ConnectAuth")).abi,
           "LogRemoveAuth",
           {
             _msgSender: wallet0.address,
@@ -1263,8 +1263,8 @@ describe("LayerAccount V2", function () {
             value: "0",
           }
         );
-        let targetsNames = ["authV2", "authV2"];
-        let targets = [layerAuthV2.address, layerAuthV2.address];
+        let targetsNames = ["auth", "auth"];
+        let targets = [layerAuth.address, layerAuth.address];
         let eventNames = [
           "LogAddAuth(address,address)",
           "LogRemoveAuth(address,address)",
@@ -1303,7 +1303,7 @@ describe("LayerAccount V2", function () {
         expect(await dsaWallet1.connect(wallet0).isAuth(wallet1.address)).to.be;
         let spells = [
           {
-            connector: "authV2",
+            connector: "auth",
             method: "add",
             args: [wallet1.address],
           },
@@ -1331,7 +1331,7 @@ describe("LayerAccount V2", function () {
         );
         expectEvent(
           receipt,
-          (await deployments.getArtifact("ConnectV2Auth")).abi,
+          (await deployments.getArtifact("ConnectAuth")).abi,
           "LogAddAuth",
           {
             _msgSender: wallet0.address,
@@ -1340,7 +1340,7 @@ describe("LayerAccount V2", function () {
         );
         expectEvent(
           receipt,
-          (await deployments.getArtifact("ConnectV2EmitEvent")).abi,
+          (await deployments.getArtifact("ConnectEmitEvent")).abi,
           "LogEmitEvent",
           {
             dsaAddress: dsaWallet2.address,
@@ -1359,8 +1359,8 @@ describe("LayerAccount V2", function () {
           }
         );
 
-        let targetsNames = ["authV2", "emitEvent"];
-        let targets = [layerAuthV2.address, layerEventV2.address];
+        let targetsNames = ["auth", "emitEvent"];
+        let targets = [layerAuth.address, layerEvent.address];
         let eventNames = [
           "LogAddAuth(address,address)",
           "LogEmitEvent(address,address)",
@@ -1411,7 +1411,7 @@ describe("LayerAccount V2", function () {
 
         expectEvent(
           receipt,
-          (await deployments.getArtifact("ConnectV2EmitEvent")).abi,
+          (await deployments.getArtifact("ConnectEmitEvent")).abi,
           "LogEmitEvent",
           {
             dsaAddress: dsaWallet2.address,
@@ -1430,7 +1430,7 @@ describe("LayerAccount V2", function () {
           }
         );
         let targetsNames = ["emitEvent"];
-        let targets = [layerEventV2.address];
+        let targets = [layerEvent.address];
         let eventNames = ["LogEmitEvent(address,address)"];
         let eventParams = [
           ethers.utils.defaultAbiCoder.encode(

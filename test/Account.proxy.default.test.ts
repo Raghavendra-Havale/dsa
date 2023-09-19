@@ -16,9 +16,9 @@ import BigNumber from "bignumber.js";
 import deployConnector from "../scripts/deployConnector";
 
 import {
-  ConnectV2Auth__factory,
-  LayerDefaultImplementationV2__factory,
-  ConnectV2EmitEvent__factory,
+  ConnectAuth__factory,
+  LayerDefaultImplementation2__factory,
+  ConnectEmitEvent__factory,
   NFTTest__factory,
   TokenTest__factory,
 } from "../typechain";
@@ -56,14 +56,14 @@ describe("LayerAccount Proxy", function () {
     layerList: Contract,
     layerConnectorsTest: Contract,
     layerConnectors: Contract,
-    layerConnectorsV2Test: Contract,
+    layerConnectors2Test: Contract,
     implementationsMapping: Contract,
     layerAccountProxy: Contract,
     layerAccountV2ImplM1: Contract,
     layerAccountV2ImplM2: Contract,
     layerAccountV2ImplM0: Contract,
     layerAccountV2DefaultImpl: Contract,
-    layerAccountV2DefaultImplV2: Contract;
+    layerAccount2DefaultImpl2: Contract;
 
   const addr_zero = ethers.constants.AddressZero;
   const maxValue = ethers.constants.MaxUint256;
@@ -89,7 +89,7 @@ describe("LayerAccount Proxy", function () {
     "onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)",
   ].map((a) => web3.utils.keccak256(a).slice(0, 10));
 
-  const layerAccountV2DefaultImplV2Sigs = [
+  const layerAccount2DefaultImpl2Sigs = [
     "isAuth(address)",
     "switchShield(bool)",
     "editCheckMapping(address,bool)",
@@ -132,7 +132,7 @@ describe("LayerAccount Proxy", function () {
       layerIndex.address,
     ]);
 
-    layerConnectorsV2Test = await layerDeployContract("LayerConnectorsV2Test", [
+    layerConnectors2Test = await layerDeployContract("LayerConnectors2Test", [
       layerIndex.address,
     ]);
 
@@ -152,7 +152,7 @@ describe("LayerAccount Proxy", function () {
     );
     layerAccountV2ImplM1 = await layerDeployContract("LayerImplementationM1", [
       layerIndex.address,
-      layerConnectorsV2Test.address,
+      layerConnectors2Test.address,
     ]);
     layerAccountV2ImplM2 = await layerDeployContract("LayerImplementationM2", [
       layerIndex.address,
@@ -178,8 +178,8 @@ describe("LayerAccount Proxy", function () {
 
     masterSigner = ethers.provider.getSigner(masterAddress);
 
-    layerAccountV2DefaultImplV2 = await layerDeployContract(
-      "LayerDefaultImplementationV2",
+    layerAccount2DefaultImpl2 = await layerDeployContract(
+      "LayerDefaultImplementation2",
       []
     );
 
@@ -211,7 +211,7 @@ describe("LayerAccount Proxy", function () {
     expect(!!layerConnectors.address).to.be.true;
     expect(!!implementationsMapping.address).to.be.true;
     expect(!!layerAccountV2DefaultImpl.address).to.be.true;
-    expect(!!layerAccountV2DefaultImplV2.address).to.be.true;
+    expect(!!layerAccount2DefaultImpl2.address).to.be.true;
     expect(!!layerAccountProxy.address).to.be.true;
     expect(!!layerAccountV2ImplM1.address).to.be.true;
     expect(!!layerAccountV2ImplM2.address).to.be.true;
@@ -275,7 +275,7 @@ describe("LayerAccount Proxy", function () {
         .connect(masterSigner)
         .addNewAccount(
           layerAccountProxy.address,
-          layerConnectorsV2Test.address,
+          layerConnectors2Test.address,
           addr_zero
         );
       let txDetails = await tx.wait();

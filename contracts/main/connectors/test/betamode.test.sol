@@ -43,6 +43,6 @@ abstract contract Resolver is Events {
     }
 }
 
-contract ConnectV2Beta is Resolver {
+contract ConnectBeta is Resolver {
     string public constant name = "Beta-v1";
 }

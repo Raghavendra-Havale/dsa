@@ -1,6 +1,6 @@
 pragma solidity ^0.8.0;
 
-contract ConnectV2EmitEvent {
+contract ConnectEmitEvent {
 
     event LogEmitEvent(address indexed dsaAddress, address indexed _sender);
 

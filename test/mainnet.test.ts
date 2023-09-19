@@ -11,19 +11,19 @@ import getMasterSigner from "../scripts/getMasterSigner";
 import addresses from "../scripts/constant/addresses";
 
 import {
-  ConnectV2Auth__factory,
+  ConnectAuth__factory,
   LayerAccount,
   LayerConnectors,
   LayerImplementationM1,
   LayerDefaultImplementation,
   LayerImplementationM2,
-  LayerDefaultImplementationV2,
+  LayerDefaultImplementation2,
   LayerImplementations,
   LayerIndex,
   ConnectCompound__factory,
-  LayerDefaultImplementationV2__factory,
+  LayerDefaultImplementation2__factory,
   LayerImplementationM2__factory,
-  ConnectV2EmitEvent__factory,
+  ConnectEmitEvent__factory,
 } from "../typechain";
 
 import type { Contract, Signer } from "ethers";
@@ -54,7 +54,7 @@ describe("Mainnet", function () {
     layerAccountV2ImplM1: Contract,
     layerAccountV2ImplM2: Contract,
     layerAccountV2DefaultImpl: Contract,
-    layerAccountV2DefaultImplV2: Contract,
+    layerAccount2DefaultImpl2: Contract,
     layerIndex: Contract;
 
   const layerAccountV2DefaultImplSigsV2 = [
@@ -130,9 +130,9 @@ describe("Mainnet", function () {
       LayerImplementationM2__factory,
       [layerIndex.address, layerConnectors.address]
     );
-    layerAccountV2DefaultImplV2 = await deployContract(
+    layerAccount2DefaultImpl2 = await deployContract(
       masterSigner,
-      LayerDefaultImplementationV2__factory,
+      LayerDefaultImplementation2__factory,
       []
     );
   });
@@ -197,11 +197,11 @@ describe("Mainnet", function () {
       ).to.be.equal(0);
     });
 
-    it("Should add LayerDefaultImplementationV2 sigs to mapping.", async function () {
+    it("Should add LayerDefaultImplementation2 sigs to mapping.", async function () {
       const tx = await implementationsMapping
         .connect(masterSigner)
         .addImplementation(
-          layerAccountV2DefaultImplV2.address,
+          layerAccount2DefaultImpl2.address,
           layerAccountV2DefaultImplSigsV2
         );
       await tx.wait();
@@ -209,20 +209,20 @@ describe("Mainnet", function () {
         await implementationsMapping.getSigImplementation(
           layerAccountV2DefaultImplSigsV2[0]
         )
-      ).to.be.equal(layerAccountV2DefaultImplV2.address);
+      ).to.be.equal(layerAccount2DefaultImpl2.address);
       (
         await implementationsMapping.getImplementationSigs(
-          layerAccountV2DefaultImplV2.address
+          layerAccount2DefaultImpl2.address
         )
       ).forEach((a: any, i: string | number) => {
         expect(a).to.be.eq(layerAccountV2DefaultImplSigsV2[i]);
       });
     });
 
-    it("Should remove LayerDefaultImplementationV2 sigs to mapping.", async function () {
+    it("Should remove LayerDefaultImplementation2 sigs to mapping.", async function () {
       const tx = await implementationsMapping
         .connect(masterSigner)
-        .removeImplementation(layerAccountV2DefaultImplV2.address);
+        .removeImplementation(layerAccount2DefaultImpl2.address);
       await tx.wait();
       expect(
         await implementationsMapping.getSigImplementation(
@@ -232,7 +232,7 @@ describe("Mainnet", function () {
       expect(
         (
           await implementationsMapping.getImplementationSigs(
-            layerAccountV2DefaultImplV2.address
+            layerAccount2DefaultImpl2.address
           )
         ).length
       ).to.be.equal(0);
@@ -279,7 +279,7 @@ describe("Mainnet", function () {
         dsaWalletAddress
       );
       acountV2DsaDefaultWalletM2 = await ethers.getContractAt(
-        "LayerDefaultImplementationV2",
+        "LayerDefaultImplementation2",
         dsaWalletAddress
       );
     });
@@ -287,23 +287,23 @@ describe("Mainnet", function () {
     it("Should deploy Auth connector", async function () {
       await deployConnector(
         {
-          connectorName: "authV2",
-          contract: "ConnectV2Auth",
-          factory: ConnectV2Auth__factory,
+          connectorName: "auth",
+          contract: "ConnectAuth",
+          factory: ConnectAuth__factory,
         },
         [LAYER_LIST]
       );
-      expect(!!addresses.connectors["authV2"]).to.be.true;
+      expect(!!addresses.connectors["auth"]).to.be.true;
       await layerConnectors
         .connect(masterSigner)
-        .addConnectors(["authV2"], [addresses.connectors["authV2"]]);
+        .addConnectors(["auth"], [addresses.connectors["auth"]]);
     });
 
     it("Should deploy EmitEvent connector", async function () {
       await deployConnector({
         connectorName: "emitEvent",
-        contract: "ConnectV2EmitEvent",
-        factory: ConnectV2EmitEvent__factory,
+        contract: "ConnectEmitEvent",
+        factory: ConnectEmitEvent__factory,
       });
       expect(!!addresses.connectors["emitEvent"]).to.be.true;
       await layerConnectors
@@ -313,7 +313,7 @@ describe("Mainnet", function () {
 
     it("Should add wallet1 as auth", async function () {
       const spells = {
-        connector: "authV2",
+        connector: "auth",
         method: "add",
         args: [wallet1.address],
       };
@@ -329,14 +329,14 @@ describe("Mainnet", function () {
       );
       const LogAddAuthEvent = expectEvent(
         receipt,
-        (await deployments.getArtifact("ConnectV2Auth")).abi,
+        (await deployments.getArtifact("ConnectAuth")).abi,
         "LogAddAuth"
       );
     });
 
     it("Should add wallet2 as auth", async function () {
       const spells = {
-        connector: "authV2",
+        connector: "auth",
         method: "add",
         args: [wallet2.address],
       };
@@ -352,14 +352,14 @@ describe("Mainnet", function () {
       );
       const LogAddAuthEvent = expectEvent(
         receipt,
-        (await deployments.getArtifact("ConnectV2Auth")).abi,
+        (await deployments.getArtifact("ConnectAuth")).abi,
         "LogAddAuth"
       );
     });
 
     it("Should remove wallet1 as auth", async function () {
       const spells = {
-        connector: "authV2",
+        connector: "auth",
         method: "remove",
         args: [wallet1.address],
       };
@@ -375,7 +375,7 @@ describe("Mainnet", function () {
       );
       expectEvent(
         receipt,
-        (await deployments.getArtifact("ConnectV2Auth")).abi,
+        (await deployments.getArtifact("ConnectAuth")).abi,
         "LogRemoveAuth"
       );
     });
@@ -383,10 +383,10 @@ describe("Mainnet", function () {
     it("Should change default implementation", async function () {
       const tx = await implementationsMapping
         .connect(masterSigner)
-        .setDefaultImplementation(layerAccountV2DefaultImplV2.address);
+        .setDefaultImplementation(layerAccount2DefaultImpl2.address);
       await tx.wait();
       expect(await implementationsMapping.defaultImplementation()).to.be.equal(
-        layerAccountV2DefaultImplV2.address
+        layerAccount2DefaultImpl2.address
       );
     });
 
@@ -400,7 +400,7 @@ describe("Mainnet", function () {
         .true;
       expectEvent(
         receipt,
-        (await deployments.getArtifact("LayerDefaultImplementationV2")).abi,
+        (await deployments.getArtifact("LayerDefaultImplementation2")).abi,
         "LogEnableUser"
       );
     });
@@ -415,7 +415,7 @@ describe("Mainnet", function () {
         .false;
       expectEvent(
         receipt,
-        (await deployments.getArtifact("LayerDefaultImplementationV2")).abi,
+        (await deployments.getArtifact("LayerDefaultImplementation2")).abi,
         "LogDisableUser"
       );
     });
@@ -429,7 +429,7 @@ describe("Mainnet", function () {
       expect(await acountV2DsaDefaultWalletM2.shield()).to.be.true;
       expectEvent(
         receipt,
-        (await deployments.getArtifact("LayerDefaultImplementationV2")).abi,
+        (await deployments.getArtifact("LayerDefaultImplementation2")).abi,
         "LogSwitchShield"
       );
     });
@@ -462,8 +462,8 @@ describe("Mainnet", function () {
     it("Should new connector", async function () {
       await deployConnector({
         connectorName: "authV1",
-        contract: "ConnectV2Auth",
-        factory: ConnectV2Auth__factory,
+        contract: "ConnectAuth",
+        factory: ConnectAuth__factory,
       }, [LAYER_LIST]);
       expect(!!addresses.connectors["authV1"]).to.be.true;
       await layerConnectors
@@ -489,7 +489,7 @@ describe("Mainnet", function () {
       );
       expectEvent(
         receipt,
-        (await deployments.getArtifact("ConnectV2Auth")).abi,
+        (await deployments.getArtifact("ConnectAuth")).abi,
         "LogAddAuth"
       );
     });
@@ -507,7 +507,7 @@ describe("Mainnet", function () {
         .cast(encodedSpells[0], encodedSpells[1], wallet3.address);
       const receipt = await tx.wait();
 
-      const eventAbi = (await deployments.getArtifact("ConnectV2EmitEvent"))
+      const eventAbi = (await deployments.getArtifact("ConnectEmitEvent"))
         .abi;
 
       const castEvent = [
@@ -535,8 +535,8 @@ describe("Mainnet", function () {
         ConnectCompound__factory,
         []
       );
-      authV3 = await deployContract(masterSigner, ConnectV2Auth__factory, [LAYER_LIST]);
-      authV4 = await deployContract(masterSigner, ConnectV2Auth__factory, [LAYER_LIST]);
+      authV3 = await deployContract(masterSigner, ConnectAuth__factory, [LAYER_LIST]);
+      authV4 = await deployContract(masterSigner, ConnectAuth__factory, [LAYER_LIST]);
       compound2 = await deployContract(
         masterSigner,
         ConnectCompound__factory,

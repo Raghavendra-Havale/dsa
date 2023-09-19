@@ -103,6 +103,6 @@ contract Record is CommonSetup {
     }
 }
 
-contract LayerDefaultImplementationV2 is Record {
+contract LayerDefaultImplementation2 is Record {
     receive() external payable {}
 }

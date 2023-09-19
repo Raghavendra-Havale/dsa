@@ -6,8 +6,8 @@ import encodeSpells from "../scripts/encodeSpells";
 import getMasterSigner from "../scripts/getMasterSigner";
 import addresses from "../scripts/constant/addresses";
 import {
-  LayerDefaultImplementationV2__factory,
-  ConnectV2Beta__factory,
+  LayerDefaultImplementation2__factory,
+  ConnectBeta__factory,
 } from "../typechain";
 const { ethers, web3, deployments, waffle } = hre;
 const { provider, deployContract } = waffle;
@@ -84,7 +84,7 @@ describe("Betamode", function () {
     masterSigner = await getMasterSigner();
     layerAccountV2DefaultImplV2 = await deployContract(
       masterSigner,
-      LayerDefaultImplementationV2__factory,
+      LayerDefaultImplementation2__factory,
       []
     );
   });
@@ -210,16 +210,16 @@ describe("Betamode", function () {
     });
 
     it("Should deploy Beta connector", async function () {
-      const connectorName = "betaV2";
+      const connectorName = "beta";
       await deployConnector({
         connectorName,
-        contract: "ConnectV2Beta",
-        factory: ConnectV2Beta__factory,
+        contract: "ConnectBeta",
+        factory: ConnectBeta__factory,
       });
-      expect(!!addresses.connectors["betaV2"]).to.be.true;
+      expect(!!addresses.connectors["beta"]).to.be.true;
       const tx = await layerConnectors
         .connect(masterSigner)
-        .addConnectors(["betaV2"], [addresses.connectors["betaV2"]]);
+        .addConnectors(["beta"], [addresses.connectors["beta"]]);
       const receipt = await tx.wait();
       const events = receipt.events;
       expect(events[0].args.connectorNameHash).to.be.eq(
@@ -230,7 +230,7 @@ describe("Betamode", function () {
 
     it("Should enable/disable beta-mode", async function () {
       const spell0 = {
-        connector: "betaV2",
+        connector: "beta",
         method: "enable",
         args: [],
       };
@@ -244,7 +244,7 @@ describe("Betamode", function () {
       expect(enabled).to.equal(true);
 
       const spell1 = {
-        connector: "betaV2",
+        connector: "beta",
         method: "disable",
         args: [],
       };
