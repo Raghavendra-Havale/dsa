@@ -35,9 +35,9 @@ describe("Core", function () {
     "115792089237316195423570985008687907853269984665640564039457584007913129639935";
 
   let LAYER_LIST = "0x4c8a1BEb8a87765788946D6B19C6C6355194AbEb";
-  let layerConnectorsV2: Contract,
+  let layerConnectors: Contract,
     implementationsMapping: Contract,
-    layerAccountV2Proxy: Contract,
+    layerAccountProxy: Contract,
     layerAccountV2ImplM1: Contract,
     layerAccountV2ImplM2: Contract,
     layerAccountV2DefaultImpl: Contract,
@@ -96,9 +96,9 @@ describe("Core", function () {
     const result = await deployContracts();
     layerAccountV2DefaultImpl = result.layerAccountV2DefaultImpl;
     layerIndex = result.layerIndex;
-    layerConnectorsV2 = result.layerConnectorsV2;
+    layerConnectors = result.layerConnectors;
     implementationsMapping = result.implementationsMapping;
-    layerAccountV2Proxy = result.layerAccountV2Proxy;
+    layerAccountProxy = result.layerAccountProxy;
     layerAccountV2ImplM1 = result.layerAccountV2ImplM1;
     layerAccountV2ImplM2 = result.layerAccountV2ImplM2;
 
@@ -112,9 +112,9 @@ describe("Core", function () {
   });
 
   it("Should have contracts deployed.", async function () {
-    expect(!!layerConnectorsV2.address).to.be.true;
+    expect(!!layerConnectors.address).to.be.true;
     expect(!!implementationsMapping.address).to.be.true;
-    expect(!!layerAccountV2Proxy.address).to.be.true;
+    expect(!!layerAccountProxy.address).to.be.true;
     expect(!!layerAccountV2ImplM1.address).to.be.true;
     expect(!!layerAccountV2ImplM2.address).to.be.true;
   });
@@ -177,10 +177,10 @@ describe("Core", function () {
     it("Should add LayerAccountV2 in Index.sol", async function () {
       const tx = await layerIndex
         .connect(masterSigner)
-        .addNewAccount(layerAccountV2Proxy.address, address_zero, address_zero);
+        .addNewAccount(layerAccountProxy.address, address_zero, address_zero);
       await tx.wait();
       expect(await layerIndex.account(2)).to.be.equal(
-        layerAccountV2Proxy.address
+        layerAccountProxy.address
       );
     });
 
@@ -301,7 +301,7 @@ describe("Core", function () {
         [LAYER_LIST]
       );
       expect(!!addresses.connectors["authV2"]).to.be.true;
-      const tx = await layerConnectorsV2
+      const tx = await layerConnectors
         .connect(masterSigner)
         .addConnectors(["authV2"], [addresses.connectors["authV2"]]);
       const receipt = await tx.wait();
@@ -320,7 +320,7 @@ describe("Core", function () {
         factory: ConnectV2EmitEvent__factory,
       });
       expect(!!addresses.connectors["emitEvent"]).to.be.true;
-      const tx = await layerConnectorsV2
+      const tx = await layerConnectors
         .connect(masterSigner)
         .addConnectors(["emitEvent"], [addresses.connectors["emitEvent"]]);
       const receipt = await tx.wait();
@@ -484,7 +484,7 @@ describe("Core", function () {
         factory: ConnectV2Auth__factory,
       }, [LAYER_LIST]);
       expect(!!addresses.connectors["authV1"]).to.be.true;
-      const tx = await layerConnectorsV2
+      const tx = await layerConnectors
         .connect(masterSigner)
         .addConnectors(["authV1"], [addresses.connectors["authV1"]]);
       const receipt = await tx.wait();
@@ -569,12 +569,12 @@ describe("Core", function () {
       const connectorsArray = ["authV3"];
       const addressesArray = [authV3.address];
 
-      let [isOk, addresses] = await layerConnectorsV2.isConnectors(
+      let [isOk, addresses] = await layerConnectors.isConnectors(
         connectorsArray
       );
       expect(isOk).to.be.false;
 
-      const tx = await layerConnectorsV2
+      const tx = await layerConnectors
         .connect(masterSigner)
         .addConnectors(connectorsArray, addressesArray);
       const receipt = await tx.wait();
@@ -584,7 +584,7 @@ describe("Core", function () {
       );
       expect(events[0].args.connectorName).to.be.eq(connectorsArray[0]);
 
-      let [isOkEnd, addressesEnd] = await layerConnectorsV2.isConnectors(
+      let [isOkEnd, addressesEnd] = await layerConnectors.isConnectors(
         connectorsArray
       );
       expect(isOkEnd).to.be.true;
@@ -594,17 +594,17 @@ describe("Core", function () {
       const connectorsArray = ["authV3"];
       const addressesArray = [authV3.address];
 
-      let [isOk, addresses] = await layerConnectorsV2.isConnectors(
+      let [isOk, addresses] = await layerConnectors.isConnectors(
         connectorsArray
       );
       expect(isOk).to.be.true;
 
       await expect(
-        layerConnectorsV2
+        layerConnectors
           .connect(masterSigner)
           .addConnectors(connectorsArray, addressesArray)
       ).to.be.revertedWith("addConnectors: _connectorName added already");
-      [isOk, addresses] = await layerConnectorsV2.isConnectors(connectorsArray);
+      [isOk, addresses] = await layerConnectors.isConnectors(connectorsArray);
       expect(isOk).to.be.true;
     });
 
@@ -612,12 +612,12 @@ describe("Core", function () {
       const connectorsArray = ["authV4", "compound"];
       const addressesArray = [authV4.address, compound.address];
 
-      let [isOk, addresses] = await layerConnectorsV2.isConnectors(
+      let [isOk, addresses] = await layerConnectors.isConnectors(
         connectorsArray
       );
       expect(isOk).to.be.false;
 
-      const tx = await layerConnectorsV2
+      const tx = await layerConnectors
         .connect(masterSigner)
         .addConnectors(connectorsArray, addressesArray);
       const receipt = await tx.wait();
@@ -633,7 +633,7 @@ describe("Core", function () {
           expect(event.args.connectorName).to.be.eq(connectorsArray[i]);
         }
       );
-      const [isOkEnd, addressesEnd] = await layerConnectorsV2.isConnectors(
+      const [isOkEnd, addressesEnd] = await layerConnectors.isConnectors(
         connectorsArray
       );
       expect(isOkEnd).to.be.true;
@@ -642,12 +642,12 @@ describe("Core", function () {
     it("Connector can be removed", async function () {
       const connectorsArray = ["authV3"];
 
-      let [isOk, addresses] = await layerConnectorsV2.isConnectors(
+      let [isOk, addresses] = await layerConnectors.isConnectors(
         connectorsArray
       );
       expect(isOk).to.be.true;
 
-      const tx = await layerConnectorsV2
+      const tx = await layerConnectors
         .connect(masterSigner)
         .removeConnectors(connectorsArray);
       const receipt = await tx.wait();
@@ -663,7 +663,7 @@ describe("Core", function () {
           expect(event.args.connectorName).to.be.eq(connectorsArray[i]);
         }
       );
-      const [isOkEnd, addressesEnd] = await layerConnectorsV2.isConnectors(
+      const [isOkEnd, addressesEnd] = await layerConnectors.isConnectors(
         connectorsArray
       );
       expect(isOkEnd).to.be.false;
@@ -672,12 +672,12 @@ describe("Core", function () {
     it("Multiple connectors can be removed", async function () {
       const connectorsArray = ["authV4", "compound"];
 
-      let [isOk, addresses] = await layerConnectorsV2.isConnectors(
+      let [isOk, addresses] = await layerConnectors.isConnectors(
         connectorsArray
       );
       expect(isOk).to.be.true;
 
-      const tx = await layerConnectorsV2
+      const tx = await layerConnectors
         .connect(masterSigner)
         .removeConnectors(connectorsArray);
       const receipt = await tx.wait();
@@ -693,7 +693,7 @@ describe("Core", function () {
           expect(event.args.connectorName).to.be.eq(connectorsArray[i]);
         }
       );
-      const [isOkEnd, addressesEnd] = await layerConnectorsV2.isConnectors(
+      const [isOkEnd, addressesEnd] = await layerConnectors.isConnectors(
         connectorsArray
       );
       expect(isOkEnd).to.be.false;
@@ -703,12 +703,12 @@ describe("Core", function () {
       const connectorsArray = ["authV3"];
       const addressesArray = [authV3.address];
 
-      let [isOk, addresses] = await layerConnectorsV2.isConnectors(
+      let [isOk, addresses] = await layerConnectors.isConnectors(
         connectorsArray
       );
       expect(isOk).to.be.false;
 
-      const tx = await layerConnectorsV2
+      const tx = await layerConnectors
         .connect(masterSigner)
         .addConnectors(connectorsArray, addressesArray);
       const receipt = await tx.wait();
@@ -724,7 +724,7 @@ describe("Core", function () {
           expect(event.args.connectorName).to.be.eq(connectorsArray[i]);
         }
       );
-      const [isOkEnd, addressesEnd] = await layerConnectorsV2.isConnectors(
+      const [isOkEnd, addressesEnd] = await layerConnectors.isConnectors(
         connectorsArray
       );
       expect(isOkEnd).to.be.true;
@@ -733,30 +733,30 @@ describe("Core", function () {
     it("Returns false if one of them is not a connector", async function () {
       const connectorsArray = ["authV4", "compound"];
 
-      let [isOk, addresses] = await layerConnectorsV2.isConnectors(
+      let [isOk, addresses] = await layerConnectors.isConnectors(
         connectorsArray
       );
       expect(isOk).to.be.false;
     });
 
     it("Should add chief", async function () {
-      expect(await layerConnectorsV2.chief(wallet0.address)).to.be.false;
-      await layerConnectorsV2
+      expect(await layerConnectors.chief(wallet0.address)).to.be.false;
+      await layerConnectors
         .connect(masterSigner)
         .toggleChief(wallet0.address);
-      expect(await layerConnectorsV2.chief(wallet0.address)).to.be.true;
+      expect(await layerConnectors.chief(wallet0.address)).to.be.true;
     });
 
     it("New chief can add connectors", async function () {
       const connectorsArray = ["compound"];
       const addressesArray = [compound.address];
 
-      let [isOk, addresses] = await layerConnectorsV2.isConnectors(
+      let [isOk, addresses] = await layerConnectors.isConnectors(
         connectorsArray
       );
       expect(isOk).to.be.false;
 
-      const tx = await layerConnectorsV2
+      const tx = await layerConnectors
         .connect(wallet0)
         .addConnectors(connectorsArray, addressesArray);
       const receipt = await tx.wait();
@@ -772,7 +772,7 @@ describe("Core", function () {
           expect(event.args.connectorName).to.be.eq(connectorsArray[i]);
         }
       );
-      const [isOkEnd, addressesEnd] = await layerConnectorsV2.isConnectors(
+      const [isOkEnd, addressesEnd] = await layerConnectors.isConnectors(
         connectorsArray
       );
       expect(isOkEnd).to.be.true;
@@ -782,16 +782,16 @@ describe("Core", function () {
       const connectorsArray = ["compound"];
       const addressesArray = [compound2.address];
 
-      let [isOk, addresses] = await layerConnectorsV2.isConnectors(
+      let [isOk, addresses] = await layerConnectors.isConnectors(
         connectorsArray
       );
       expect(isOk).to.be.true;
       expect(addresses).to.not.eql(addressesArray);
 
-      await layerConnectorsV2
+      await layerConnectors
         .connect(wallet0)
         .updateConnectors(connectorsArray, addressesArray);
-      [isOk, addresses] = await layerConnectorsV2.isConnectors(connectorsArray);
+      [isOk, addresses] = await layerConnectors.isConnectors(connectorsArray);
       expect(addresses).to.be.eql(addressesArray);
       expect(isOk).to.be.true;
     });
@@ -800,42 +800,42 @@ describe("Core", function () {
       const connectorsArray = ["compoundV2"];
       const addressesArray = [compound.address];
 
-      let [isOk, addresses] = await layerConnectorsV2.isConnectors(
+      let [isOk, addresses] = await layerConnectors.isConnectors(
         connectorsArray
       );
       expect(isOk).to.be.false;
 
       await expect(
-        layerConnectorsV2
+        layerConnectors
           .connect(wallet1)
           .addConnectors(connectorsArray, addressesArray)
       ).to.be.revertedWith("not-an-chief");
-      [isOk, addresses] = await layerConnectorsV2.isConnectors(connectorsArray);
+      [isOk, addresses] = await layerConnectors.isConnectors(connectorsArray);
       expect(isOk).to.be.false;
     });
 
     it("New chief can not add more chief", async function () {
-      expect(await layerConnectorsV2.chief(wallet1.address)).to.be.false;
+      expect(await layerConnectors.chief(wallet1.address)).to.be.false;
       await expect(
-        layerConnectorsV2.connect(wallet0).toggleChief(wallet1.address)
+        layerConnectors.connect(wallet0).toggleChief(wallet1.address)
       ).to.be.revertedWith("toggleChief: not-master");
-      expect(await layerConnectorsV2.chief(wallet1.address)).to.be.false;
+      expect(await layerConnectors.chief(wallet1.address)).to.be.false;
     });
 
     it("Can update multiple connector addresses", async function () {
       const connectorsArray = ["compound", "authV3"];
       const addressesArray = [compound.address, authV4.address];
 
-      let [isOk, addresses] = await layerConnectorsV2.isConnectors(
+      let [isOk, addresses] = await layerConnectors.isConnectors(
         connectorsArray
       );
       expect(isOk).to.be.true;
       expect(addresses).to.not.eql(addressesArray);
 
-      await layerConnectorsV2
+      await layerConnectors
         .connect(masterSigner)
         .updateConnectors(connectorsArray, addressesArray);
-      [isOk, addresses] = await layerConnectorsV2.isConnectors(connectorsArray);
+      [isOk, addresses] = await layerConnectors.isConnectors(connectorsArray);
       expect(addresses).to.be.eql(addressesArray);
       expect(isOk).to.be.true;
     });
@@ -844,14 +844,14 @@ describe("Core", function () {
       const connectorsArray = ["authV4"];
       const addressesArray = [authV4.address];
 
-      let [isOk, addresses] = await layerConnectorsV2.isConnectors(
+      let [isOk, addresses] = await layerConnectors.isConnectors(
         connectorsArray
       );
       expect(isOk).to.be.false;
       expect(addresses).to.not.eql(addressesArray);
 
       await expect(
-        layerConnectorsV2
+        layerConnectors
           .connect(wallet0)
           .updateConnectors(connectorsArray, addressesArray)
       ).to.be.revertedWith(
@@ -862,9 +862,9 @@ describe("Core", function () {
     // after(async () => {
     //   const connectorsArray = [ compound.address ]
 
-    //   expect(await layerConnectorsV2.isConnector(connectorsArray)).to.be.false
-    //   await layerConnectorsV2.connect(masterSigner).toggleConnectors(connectorsArray)
-    //   expect(await layerConnectorsV2.isConnector(connectorsArray)).to.be.true
+    //   expect(await layerConnectors.isConnector(connectorsArray)).to.be.false
+    //   await layerConnectors.connect(masterSigner).toggleConnectors(connectorsArray)
+    //   expect(await layerConnectors.isConnector(connectorsArray)).to.be.true
     // });
   });
 
@@ -873,12 +873,12 @@ describe("Core", function () {
       const connectorsArray = ["basic"];
       const addressesArray = [addresses.connectors["basic"]];
 
-      let [isOk, addresses_] = await layerConnectorsV2.isConnectors(
+      let [isOk, addresses_] = await layerConnectors.isConnectors(
         connectorsArray
       );
       expect(isOk).to.be.false;
 
-      const tx = await layerConnectorsV2
+      const tx = await layerConnectors
         .connect(masterSigner)
         .addConnectors(connectorsArray, addressesArray);
       const receipt = await tx.wait();
@@ -894,7 +894,7 @@ describe("Core", function () {
           expect(event.args.connectorName).to.be.eq(connectorsArray[i]);
         }
       );
-      const [isOkEnd, addressesEnd] = await layerConnectorsV2.isConnectors(
+      const [isOkEnd, addressesEnd] = await layerConnectors.isConnectors(
         connectorsArray
       );
       expect(isOkEnd).to.be.true;
@@ -903,7 +903,7 @@ describe("Core", function () {
     it("Should be a deployed connector", async function () {
       let isOk: any, addresses_: any;
       const connectorsArray = ["compound"];
-      [isOk, addresses_] = await layerConnectorsV2.isConnectors(
+      [isOk, addresses_] = await layerConnectors.isConnectors(
         connectorsArray
       );
       expect(isOk).to.be.true;
@@ -1088,15 +1088,15 @@ describe("Core", function () {
       const connectorsArray = ["uniswap"];
       const addressesArray = [addresses.connectors["uniswap"]];
 
-      let [isOk, addresses_] = await layerConnectorsV2.isConnectors(
+      let [isOk, addresses_] = await layerConnectors.isConnectors(
         connectorsArray
       );
       expect(isOk).to.be.false;
 
-      await layerConnectorsV2
+      await layerConnectors
         .connect(masterSigner)
         .addConnectors(connectorsArray, addressesArray);
-      [isOk, addresses_] = await layerConnectorsV2.isConnectors(
+      [isOk, addresses_] = await layerConnectors.isConnectors(
         connectorsArray
       );
       expect(isOk).to.be.true;

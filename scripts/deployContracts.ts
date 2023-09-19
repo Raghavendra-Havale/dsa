@@ -11,7 +11,7 @@ export default async function () {
 
   // const layerIndex = await layerDeployContract("LayerIndex", []);
 
-  const layerConnectorsV2 = await layerDeployContract("LayerConnectorsV2", [
+  const layerConnectors = await layerDeployContract("LayerConnectors", [
     layerIndex.address,
   ]);
 
@@ -20,7 +20,7 @@ export default async function () {
     [layerIndex.address]
   );
 
-  const layerAccountV2Proxy = await layerDeployContract("LayerAccountV2", [
+  const layerAccountProxy = await layerDeployContract("LayerAccount", [
     implementationsMapping.address,
   ]);
 
@@ -31,19 +31,19 @@ export default async function () {
 
   const layerAccountV2ImplM1 = await layerDeployContract(
     "LayerImplementationM1",
-    [layerIndex.address, layerConnectorsV2.address]
+    [layerIndex.address, layerConnectors.address]
   );
 
   const layerAccountV2ImplM2 = await layerDeployContract(
     "LayerImplementationM2",
-    [layerIndex.address, layerConnectorsV2.address]
+    [layerIndex.address, layerConnectors.address]
   );
 
   return {
     layerIndex,
-    layerConnectorsV2,
+    layerConnectors,
     implementationsMapping,
-    layerAccountV2Proxy,
+    layerAccountProxy,
     layerAccountV2DefaultImpl,
     layerAccountV2ImplM1,
     layerAccountV2ImplM2,

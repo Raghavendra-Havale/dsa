@@ -4,11 +4,11 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/proxy/TransparentUpgradeableProxy.sol";
 
 /**
- * @title LayerConnectorsV2Proxy
+ * @title LayerConnectorsProxy
  * @dev This contract is a transparent upgradeable proxy for the LayerConnectorsV2 contract.
  * It allows for the logic contract (LayerConnectorsV2) to be upgraded while maintaining the same storage and address.
  */
-contract LayerConnectorsV2Proxy is TransparentUpgradeableProxy {
+contract LayerConnectorsProxy is TransparentUpgradeableProxy {
 
     /**
      * @dev Initializes the proxy with the initial logic contract, admin address, and any initial data.

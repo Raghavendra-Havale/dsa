@@ -10,11 +10,11 @@ interface AccountImplementations {
 }
 
 /**
- * @title LayerAccountV2
+ * @title LayerAccount
  * @dev This contract provides a mechanism to delegate calls to other contracts based on function signatures.
  * It uses a registry (AccountImplementations) to determine which contract should handle a given call.
  */
-contract LayerAccountV2 {
+contract LayerAccount {
 
     // Reference to the implementations registry.
     AccountImplementations public immutable implementations;

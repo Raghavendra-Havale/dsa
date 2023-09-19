@@ -17,9 +17,9 @@ describe("LayerList", function () {
 
   let layerIndex: Contract,
     layerList: Contract,
-    layerAccountV2Proxy: Contract,
+    layerAccountProxy: Contract,
     layerDefaultAccountV2: Contract,
-    layerConnectorsV2: Contract;
+    layerConnectors: Contract;
 
   let masterSigner: Signer;
   let dsaV1: any;
@@ -62,11 +62,11 @@ describe("LayerList", function () {
 
     layerList = await layerDeployContract("LayerList", [layerIndex.address]);
 
-    layerAccountV2Proxy = await layerDeployContract("LayerAccountV2", [
+    layerAccountProxy = await layerDeployContract("LayerAccount", [
       layerIndex.address,
     ]);
 
-    layerConnectorsV2 = await layerDeployContract("LayerConnectorsV2", [
+    layerConnectors = await layerDeployContract("LayerConnectors", [
       layerIndex.address,
     ]);
 
@@ -78,8 +78,8 @@ describe("LayerList", function () {
     setBasicsArgs = [
       deployerAddress,
       layerList.address,
-      layerAccountV2Proxy.address,
-      layerConnectorsV2.address,
+      layerAccountProxy.address,
+      layerConnectors.address,
     ];
 
     await hre.network.provider.request({
@@ -93,8 +93,8 @@ describe("LayerList", function () {
   it("should have the contracts deployed", async function () {
     expect(!!layerIndex.address).to.be.true;
     expect(!!layerList.address).to.be.true;
-    expect(!!layerAccountV2Proxy.address).to.be.true;
-    expect(!!layerConnectorsV2.address).to.be.true;
+    expect(!!layerAccountProxy.address).to.be.true;
+    expect(!!layerConnectors.address).to.be.true;
   });
 
   it("should set the basics", async function () {
@@ -133,7 +133,7 @@ describe("LayerList", function () {
       .connect(masterSigner)
       .addNewAccount(
         layerDefaultAccountV2.address,
-        layerConnectorsV2.address,
+        layerConnectors.address,
         addr_zero
       );
     let txDetails = await tx.wait();

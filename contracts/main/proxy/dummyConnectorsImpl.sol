@@ -2,9 +2,9 @@
 pragma solidity ^0.8.0;
 
 /**
- * @title LayerConnectorsV2Impl
+ * @title LayerConnectorsImpl
  * @dev This contract serves as the implementation for the LayerConnectorsV2. 
  */
-contract LayerConnectorsV2Impl  {
+contract LayerConnectorsImpl  {
 
 }

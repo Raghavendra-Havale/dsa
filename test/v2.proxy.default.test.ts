@@ -29,7 +29,7 @@ import deployContracts from "../scripts/deployContracts";
 import getMasterSigner from "../scripts/getMasterSigner";
 import { encode } from "punycode";
 
-describe("LayerAccount V2P", function () {
+describe("LayerAccount Proxy", function () {
   let masterSigner: Signer,
     chief1: Signer,
     chief2: Signer,
@@ -55,10 +55,10 @@ describe("LayerAccount V2P", function () {
   let layerIndex: Contract,
     layerList: Contract,
     layerConnectorsTest: Contract,
-    layerConnectorsV2: Contract,
+    layerConnectors: Contract,
     layerConnectorsV2Test: Contract,
     implementationsMapping: Contract,
-    layerAccountV2Proxy: Contract,
+    layerAccountProxy: Contract,
     layerAccountV2ImplM1: Contract,
     layerAccountV2ImplM2: Contract,
     layerAccountV2ImplM0: Contract,
@@ -136,14 +136,14 @@ describe("LayerAccount V2P", function () {
       layerIndex.address,
     ]);
 
-    layerConnectorsV2 = await layerDeployContract("LayerConnectorsV2", [
+    layerConnectors = await layerDeployContract("LayerConnectors", [
       layerIndex.address,
     ]);
 
     implementationsMapping = await layerDeployContract("LayerImplementations", [
       layerIndex.address,
     ]);
-    layerAccountV2Proxy = await layerDeployContract("LayerAccountV2", [
+    layerAccountProxy = await layerDeployContract("LayerAccount", [
       implementationsMapping.address,
     ]);
     layerAccountV2DefaultImpl = await layerDeployContract(
@@ -156,7 +156,7 @@ describe("LayerAccount V2P", function () {
     ]);
     layerAccountV2ImplM2 = await layerDeployContract("LayerImplementationM2", [
       layerIndex.address,
-      layerConnectorsV2.address,
+      layerConnectors.address,
     ]);
 
     layerAccountV2ImplM0 = await layerDeployContract(
@@ -167,7 +167,7 @@ describe("LayerAccount V2P", function () {
     setBasicsArgs = [
       deployerAddress,
       layerList.address,
-      layerAccountV2Proxy.address,
+      layerAccountProxy.address,
       layerConnectorsTest.address,
     ];
 
@@ -208,11 +208,11 @@ describe("LayerAccount V2P", function () {
   }
 
   it("should have the contracts deployed", async function () {
-    expect(!!layerConnectorsV2.address).to.be.true;
+    expect(!!layerConnectors.address).to.be.true;
     expect(!!implementationsMapping.address).to.be.true;
     expect(!!layerAccountV2DefaultImpl.address).to.be.true;
     expect(!!layerAccountV2DefaultImplV2.address).to.be.true;
-    expect(!!layerAccountV2Proxy.address).to.be.true;
+    expect(!!layerAccountProxy.address).to.be.true;
     expect(!!layerAccountV2ImplM1.address).to.be.true;
     expect(!!layerAccountV2ImplM2.address).to.be.true;
   });
@@ -229,8 +229,8 @@ describe("LayerAccount V2P", function () {
         layerIndex
           .connect(masterSigner)
           .addNewAccount(
-            layerAccountV2Proxy.address,
-            layerConnectorsV2.address,
+            layerAccountProxy.address,
+            layerConnectors.address,
             addr_zero
           )
       ).to.be.revertedWith("LayerAccountV2: No implementation found for the given signature");
@@ -238,7 +238,7 @@ describe("LayerAccount V2P", function () {
 
     it("should send ether", async function () {
       const txn = await signer.sendTransaction({
-        to: layerAccountV2Proxy.address,
+        to: layerAccountProxy.address,
         value: ethers.utils.parseEther("2"),
       });
       expect(!!(await txn.wait()).status).to.be.true;
@@ -274,14 +274,14 @@ describe("LayerAccount V2P", function () {
       let tx = await layerIndex
         .connect(masterSigner)
         .addNewAccount(
-          layerAccountV2Proxy.address,
+          layerAccountProxy.address,
           layerConnectorsV2Test.address,
           addr_zero
         );
       let txDetails = await tx.wait();
 
       expect(await layerIndex.account(2)).to.be.equal(
-        layerAccountV2Proxy.address
+        layerAccountProxy.address
       );
     });
 
@@ -316,7 +316,7 @@ describe("LayerAccount V2P", function () {
       );
       dsaWallet2 = await ethers.getContractAt(
         (
-          await deployments.getArtifact("LayerAccountV2")
+          await deployments.getArtifact("LayerAccount")
         ).abi,
         event.args.account
       );
@@ -355,7 +355,7 @@ describe("LayerAccount V2P", function () {
     it("should send ether with method call | AccountProxy: receive()", async function () {
       const txn = await layerAccountV2ImplM0
         .connect(signer)
-        .handlePayment(layerAccountV2Proxy.address, {
+        .handlePayment(layerAccountProxy.address, {
           value: ethers.utils.parseEther("2"),
         });
       expect(!!(await txn.wait()).status).to.be.true;

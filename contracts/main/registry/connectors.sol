@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 pragma experimental ABIEncoderV2;
 
 /**
- * @title LayerConnectorsV2
+ * @title LayerConnectors
  * @dev This contract serves as a registry for Connectors. It allows for the addition, updating, and removal of connectors.
  */
 
@@ -61,10 +61,10 @@ contract Controllers {
 }
 
 /**
- * @title LayerConnectorsV2
+ * @title LayerConnectors
  * @dev Main contract for managing and interacting with connectors.
  */
-contract LayerConnectorsV2 is Controllers {
+contract LayerConnectors is Controllers {
 
     event LogConnectorAdded(
         bytes32 indexed connectorNameHash,

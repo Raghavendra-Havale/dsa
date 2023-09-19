@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 import { Variables } from "../variables.sol";
 
 /**
- * @title LayerAccountV2.
+ * @title LayerAccount
  * @dev DeFi Smart Account Wallet.
  */
 

@@ -16,9 +16,9 @@ import type { Signer, Contract } from "ethers";
 describe("Betamode", function () {
   const address_zero = "0x0000000000000000000000000000000000000000";
 
-  let layerConnectorsV2: Contract,
+  let layerConnectors: Contract,
     implementationsMapping: Contract,
-    layerAccountV2Proxy: Contract,
+    layerAccountProxy: Contract,
     layerAccountV2ImplM1: Contract,
     layerAccountV2ImplM2: Contract,
     layerAccountV2DefaultImpl: Contract,
@@ -68,9 +68,9 @@ describe("Betamode", function () {
     const result = await deployContracts();
     layerAccountV2DefaultImpl = result.layerAccountV2DefaultImpl;
     layerIndex = result.layerIndex;
-    layerConnectorsV2 = result.layerConnectorsV2;
+    layerConnectors = result.layerConnectors;
     implementationsMapping = result.implementationsMapping;
-    layerAccountV2Proxy = result.layerAccountV2Proxy;
+    layerAccountProxy = result.layerAccountProxy;
     layerAccountV2ImplM1 = result.layerAccountV2ImplM1;
     layerAccountV2ImplM2 = result.layerAccountV2ImplM2;
 
@@ -79,7 +79,7 @@ describe("Betamode", function () {
     );
     layerAccountV2ImplBeta = await LayerAccountV2ImplBeta.deploy(
       layerIndex.address,
-      layerConnectorsV2.address
+      layerConnectors.address
     );
     masterSigner = await getMasterSigner();
     layerAccountV2DefaultImplV2 = await deployContract(
@@ -90,9 +90,9 @@ describe("Betamode", function () {
   });
 
   it("Should have contracts deployed.", async function () {
-    expect(!!layerConnectorsV2.address).to.be.true;
+    expect(!!layerConnectors.address).to.be.true;
     expect(!!implementationsMapping.address).to.be.true;
-    expect(!!layerAccountV2Proxy.address).to.be.true;
+    expect(!!layerAccountProxy.address).to.be.true;
     expect(!!layerAccountV2ImplM1.address).to.be.true;
     expect(!!layerAccountV2ImplM2.address).to.be.true;
   });
@@ -155,10 +155,10 @@ describe("Betamode", function () {
     it("Should add LayerAccountV2 in Index.sol", async function () {
       const tx = await layerIndex
         .connect(masterSigner)
-        .addNewAccount(layerAccountV2Proxy.address, address_zero, address_zero);
+        .addNewAccount(layerAccountProxy.address, address_zero, address_zero);
       await tx.wait();
       expect(await layerIndex.account(2)).to.be.equal(
-        layerAccountV2Proxy.address
+        layerAccountProxy.address
       );
     });
 
@@ -217,7 +217,7 @@ describe("Betamode", function () {
         factory: ConnectV2Beta__factory,
       });
       expect(!!addresses.connectors["betaV2"]).to.be.true;
-      const tx = await layerConnectorsV2
+      const tx = await layerConnectors
         .connect(masterSigner)
         .addConnectors(["betaV2"], [addresses.connectors["betaV2"]]);
       const receipt = await tx.wait();

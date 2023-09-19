@@ -21,9 +21,9 @@ describe("LayerIndex", function () {
 
   let layerIndex: Contract,
     layerList: Contract,
-    layerAccountV2Proxy: Contract,
+    layerAccountProxy: Contract,
     layerDefaultAccountV2: Contract,
-    layerConnectorsV2: Contract,
+    layerConnectors: Contract,
     layerAccountTestV3: Contract,
     layerAccountTestV4: Contract;
 
@@ -63,7 +63,7 @@ describe("LayerIndex", function () {
 
     layerList = await layerDeployContract("LayerList", [layerIndex.address]);
 
-    layerAccountV2Proxy = await layerDeployContract("LayerAccountV2", [
+    layerAccountProxy = await layerDeployContract("LayerAccount", [
       layerIndex.address,
     ]);
 
@@ -77,15 +77,15 @@ describe("LayerIndex", function () {
       [layerIndex.address]
     );
 
-    layerConnectorsV2 = await layerDeployContract("LayerConnectorsV2", [
+    layerConnectors = await layerDeployContract("LayerConnectors", [
       layerIndex.address,
     ]);
 
     setBasicsArgs = [
       deployerAddress,
       layerList.address,
-      layerAccountV2Proxy.address,
-      layerConnectorsV2.address,
+      layerAccountProxy.address,
+      layerConnectors.address,
     ];
 
     await hre.network.provider.request({
@@ -99,8 +99,8 @@ describe("LayerIndex", function () {
   it("should have the contracts deployed", async function () {
     expect(!!layerIndex.address).to.be.true;
     expect(!!layerList.address).to.be.true;
-    expect(!!layerAccountV2Proxy.address).to.be.true;
-    expect(!!layerConnectorsV2.address).to.be.true;
+    expect(!!layerAccountProxy.address).to.be.true;
+    expect(!!layerConnectors.address).to.be.true;
   });
 
   it("should set the basics", async function () {
@@ -114,8 +114,8 @@ describe("LayerIndex", function () {
     setBasicsArgs = [
       masterAddress,
       layerList.address,
-      layerAccountV2Proxy.address,
-      layerConnectorsV2.address,
+      layerAccountProxy.address,
+      layerConnectors.address,
     ];
     await expect(layerIndex.setBasics(...setBasicsArgs)).to.be.revertedWith(
       "already-defined"
@@ -131,11 +131,11 @@ describe("LayerIndex", function () {
     expect(versionCount).to.be.equal(versionCount);
     console.log("\tVersion count set...");
     expect(await layerIndex.connectors(versionCount)).to.be.equal(
-      layerConnectorsV2.address
+      layerConnectors.address
     );
     console.log("\tConnectors Registry Module set...");
     expect(await layerIndex.account(versionCount)).to.be.equal(
-      layerAccountV2Proxy.address
+      layerAccountProxy.address
     );
     console.log("\tAccount module set...");
     expect(await layerIndex.check(versionCount)).to.be.equal(addr_zero);
@@ -229,7 +229,7 @@ describe("LayerIndex", function () {
             .connect(signer)
             .addNewAccount(
               layerDefaultAccountV2.address,
-              layerConnectorsV2.address,
+              layerConnectors.address,
               addr_zero
             )
         ).to.be.revertedWith("not-master");
@@ -239,7 +239,7 @@ describe("LayerIndex", function () {
         await expect(
           layerIndex
             .connect(newMaster)
-            .addNewAccount(addr_zero, layerConnectorsV2.address, addr_zero)
+            .addNewAccount(addr_zero, layerConnectors.address, addr_zero)
         ).to.be.revertedWith("not-valid-address");
       });
 
@@ -248,7 +248,7 @@ describe("LayerIndex", function () {
           .connect(newMaster)
           .addNewAccount(
             layerDefaultAccountV2.address,
-            layerConnectorsV2.address,
+            layerConnectors.address,
             addr_zero
           );
         let txDetails = await tx.wait();
@@ -256,7 +256,7 @@ describe("LayerIndex", function () {
         versionCount++;
         let accountArgs = {
           _newAccount: layerDefaultAccountV2.address,
-          _connectors: layerConnectorsV2.address,
+          _connectors: layerConnectors.address,
           _check: addr_zero,
         };
         expectEvent(
@@ -295,7 +295,7 @@ describe("LayerIndex", function () {
           .connect(newMaster)
           .addNewAccount(
             layerAccountTestV4.address,
-            layerConnectorsV2.address,
+            layerConnectors.address,
             check_addr
           );
         let txDetails = await tx.wait();
@@ -303,7 +303,7 @@ describe("LayerIndex", function () {
         versionCount++;
         let accountArgs = {
           _newAccount: layerAccountTestV4.address,
-          _connectors: layerConnectorsV2.address,
+          _connectors: layerConnectors.address,
           _check: check_addr,
         };
         expectEvent(
@@ -375,7 +375,7 @@ describe("LayerIndex", function () {
         accountList_after: any,
         dsaWallet1: Contract;
       it("should check if account module is clone", async function () {
-        expect(await layerIndex.isClone(1, layerAccountV2Proxy.address)).to.be.false;
+        expect(await layerIndex.isClone(1, layerAccountProxy.address)).to.be.false;
       });
 
       it("should revert with incorrect account version", async function () {
@@ -426,7 +426,7 @@ describe("LayerIndex", function () {
         expect(!!txDetails.status).to.be.true;
         dsaWallet0 = await ethers.getContractAt(
           (
-            await deployments.getArtifact("LayerAccountV2")
+            await deployments.getArtifact("LayerAccount")
           ).abi,
           txDetails.events[1].args.account
         );
@@ -512,7 +512,7 @@ describe("LayerIndex", function () {
         expect(!!txDetails.status).to.be.true;
         dsaWallet1 = await ethers.getContractAt(
           (
-            await deployments.getArtifact("LayerAccountV2")
+            await deployments.getArtifact("LayerAccount")
           ).abi,
           txDetails.events[1].args.account
         );
