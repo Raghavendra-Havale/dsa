@@ -23,7 +23,7 @@ contract CommonSetup {
     address public constant layerIndex =
         0x2971AdFa57b20E5a416aE5a708A8655A9c74f723;
     // The Account Module Version.
-    uint256 public constant version = 2;
+    uint256 public constant version = 1;
     // Auth Module(Address of Auth => bool).
     mapping(address => bool) internal auth;
     // Is shield true/false.
