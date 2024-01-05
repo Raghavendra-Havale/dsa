@@ -5,8 +5,8 @@ import "@openzeppelin/contracts/proxy/TransparentUpgradeableProxy.sol";
 
 /**
  * @title LayerConnectorsProxy
- * @dev This contract is a transparent upgradeable proxy for the LayerConnectorsV2 contract.
- * It allows for the logic contract (LayerConnectorsV2) to be upgraded while maintaining the same storage and address.
+ * @dev This contract is a transparent upgradeable proxy for the LayerConnectors contract.
+ * It allows for the logic contract (LayerConnectors) to be upgraded while maintaining the same storage and address.
  */
 contract LayerConnectorsProxy is TransparentUpgradeableProxy {
 

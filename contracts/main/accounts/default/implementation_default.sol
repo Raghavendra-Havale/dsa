@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
-pragma experimental ABIEncoderV2;
+// pragma experimental ABIEncoderV2;
 
 import { Variables } from "../variables.sol";
 
@@ -19,7 +19,7 @@ contract Constants is Variables {
     // LayerIndex Address.
     address public immutable layerIndex;
     // The Account Module Version.
-    uint256 public constant version = 2;
+    uint256 public constant version = 1;
 
     constructor(address _layerIndex) {
         layerIndex = _layerIndex;

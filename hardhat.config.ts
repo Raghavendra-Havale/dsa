@@ -1,4 +1,4 @@
-// // Buidler
+// Buidler
 import "@nomiclabs/hardhat-ethers";
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-web3";
@@ -12,25 +12,12 @@ import "hardhat-gas-reporter";
 import "solidity-coverage";
 import "solidity-docgen";
 
-
 import { resolve } from "path";
 import { config as dotenvConfig } from "dotenv";
-import { HardhatUserConfig } from "hardhat/config";
-import { NetworkUserConfig } from "hardhat/types";
 import { utils } from "ethers";
 import Web3 from "web3";
 
 dotenvConfig({ path: resolve(__dirname, "./.env") });
-
-const chainIds = {
-  ganache: 1337,
-  hardhat: 31337,
-  mainnet: 1,
-  avalanche: 43114,
-  polygon: 137,
-  arbitrum: 42161,
-  goerli: 5,
-};
 
 const ALCHEMY_ID = process.env.ALCHEMY_ID;
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
@@ -38,30 +25,17 @@ const ETHERSCAN_API = process.env.ETHERSCAN_API_KEY;
 const POLYGONSCAN_API = process.env.POLYGON_API_KEY;
 const ARBISCAN_API = process.env.ARBISCAN_API_KEY;
 const SNOWTRACE_API = process.env.SNOWTRACE_API_KEY;
-const mnemonic =
-  process.env.MNEMONIC ??
-  "test test test test test test test test test test test junk";
-
-function createConfig(network: string) {
-  return {
-    url: getNetworkUrl(network),
-    accounts: !!PRIVATE_KEY ? [`0x${PRIVATE_KEY}`] : { mnemonic },
-    timeout: 150000,
-  };
-}
+const mnemonic = process.env.MNEMONIC ?? "test test test test test test test test test test test junk";
 
 function getNetworkUrl(networkType: string) {
-  if (networkType === "avalanche")
-    return "https://api.avax.network/ext/bc/C/rpc";
-  else if (networkType === "polygon")
-    return `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_ID}`;
-  else if (networkType === "arbitrum")
-    return `https://arb-mainnet.g.alchemy.com/v2/${ALCHEMY_ID}`;
-  else if (networkType === "goerli")
-    return `https://eth-goerli.g.alchemy.com/v2/${ALCHEMY_ID}`;
+  if (networkType === "manta") return "https://pacific-rpc.manta.network/http";
+  else if (networkType === "polygon") return `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_ID}`;
+  else if (networkType === "arbitrum") return `https://arb-mainnet.g.alchemy.com/v2/${ALCHEMY_ID}`;
+  else if (networkType === "goerli") return `https://eth-goerli.g.alchemy.com/v2/${ALCHEMY_ID}`;
   else return `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_ID}`;
 }
-const INSTA_MASTER = "0xA3014F25945ae21119cecbea96056E826B6ae19B";
+
+const INSTA_MASTER = "0x5A2d0610027bADBd47FD199a2C0Fe742A2315FAb";
 
 // ================================= CONFIG =========================================
 const config = {
@@ -80,17 +54,41 @@ const config = {
     hardhat: {
       forking: {
         url: String(getNetworkUrl(String(process.env.networkType))),
-        // blockNumber: 11739260,`
         blockNumber: 15010000,
       },
       blockGasLimit: 12000000,
       masterAddress: INSTA_MASTER,
     },
-    goerli: createConfig("goerli"),
-    mainnet: createConfig("mainnet"),
-    matic: createConfig("polygon"),
-    avax: createConfig("avalanche"),
-    arbitrum: createConfig("arbitrum"),
+    goerli: {
+      url: getNetworkUrl("goerli"),
+      accounts: !!PRIVATE_KEY ? [`0x${PRIVATE_KEY}`] : { mnemonic },
+      timeout: 150000,
+    },
+    mainnet: {
+      url: getNetworkUrl("mainnet"),
+      accounts: !!PRIVATE_KEY ? [`0x${PRIVATE_KEY}`] : { mnemonic },
+      timeout: 150000,
+    },
+    polygon: {
+      url: getNetworkUrl("polygon"),
+      accounts: !!PRIVATE_KEY ? [`0x${PRIVATE_KEY}`] : { mnemonic },
+      timeout: 150000,
+      // Polygon network configurations...
+    },
+    manta: {
+      url: getNetworkUrl("manta"),
+      accounts: !!PRIVATE_KEY ? [`0x${PRIVATE_KEY}`] : { mnemonic },
+      timeout: 150000,
+      maxPriorityFeePerGas:2000,
+      maxFeePerGas: 20,
+    },
+    arbitrum: {
+      url: getNetworkUrl("arbitrum"),
+      accounts: !!PRIVATE_KEY ? [`0x${PRIVATE_KEY}`] : { mnemonic },
+      timeout: 150000,
+      // Arbitrum network configurations...
+    },
+    // ... other network configurations
   },
   solidity: {
     compilers: [
@@ -109,7 +107,19 @@ const config = {
     tests: "./test",
   },
   etherscan: {
-    apiKey: process.env.ETHERSCAN,
+    apiKey:  {
+      manta: ETHERSCAN_API
+    },
+    customChains: [
+      {
+        network: "manta",
+        chainId: 169,
+        urls: {
+          apiURL: "https://pacific-rpc.manta.network/http",
+          browserURL: "wss://pacific-rpc.manta.network/ws"
+        }
+      }
+    ]
   },
   typechain: {
     outDir: "typechain",

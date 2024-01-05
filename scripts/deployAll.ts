@@ -17,56 +17,46 @@ async function main() {
     layerIndex.address,
   ]);
 
+  const implementationsMapping = await layerDeployContract(
+    "LayerImplementations",
+    [layerIndex.address]
+  );
+
   const layerAccount = await layerDeployContract("LayerAccount", [
-    layerIndex.address,
+    implementationsMapping.address,
   ]);
 
   const layerConnectors = await layerDeployContract("LayerConnectors", [
     layerIndex.address,
   ]);
 
-  const layerEvent = await layerDeployContract("LayerEvent", [
-    layerList.address,
-  ]);
 
-  const layerMemory = await layerDeployContract("LayerMemory", []);
-
-  const layerConnectorsV2Impl = await layerDeployContract(
-    "LayerConnectorsV2Impl",
+  const layerConnectorsImpl = await layerDeployContract(
+    "LayerConnectorsImpl",
     []
   );
 
-  const layerConnectorsV2Proxy = await layerDeployContract(
-    "LayerConnectorsV2Proxy",
+  const layerConnectorsProxy = await layerDeployContract(
+    "LayerConnectorsProxy",
     [
-      layerConnectorsV2Impl.address,
-      "0x9800020b610194dBa52CF606E8Aa142F9F256166",
+      layerConnectorsImpl.address,
+      "0x5dBA78D25000c19E543E7f628eB42776b1498ff7",
       "0x",
     ]
   );
 
-  const layerConnectorsV2 = await layerDeployContract("LayerConnectorsV2", [
-    layerIndex.address,
-  ]);
-
-  const implementationsMapping = await layerDeployContract(
-    "LayerImplementations",
-    [layerIndex.address]
-  );
-
-  const layerAccountV2Proxy = await layerDeployContract("LayerAccountV2", [
-    implementationsMapping.address,
-  ]);
-
-  const layerAccountV2DefaultImpl = await layerDeployContract(
+  const layerAccountDefaultImpl = await layerDeployContract(
     "LayerDefaultImplementation",
     [layerIndex.address]
   );
 
-  const layerAccountV2ImplM1 = await layerDeployContract(
+  const layerAccountImplM1 = await layerDeployContract(
     "LayerImplementationM1",
-    [layerIndex.address, layerConnectorsV2.address]
+    [layerIndex.address, layerConnectors.address]
   );
+
+  const layerEvent=await layerDeployContract("LayerEvent",[layerList.address]);
+  const layerMemory=await layerDeployContract("LayerMemory",[]);
 
   console.log("\n########### setBasics ########");
 
@@ -85,14 +75,14 @@ async function main() {
         `);
   console.log("###########");
 
-  console.log("\n########### Add DSAv2 Implementations ########");
+  console.log("\n########### Add DSA Implementations ########");
   let txSetDefaultImplementation = await implementationsMapping.setDefaultImplementation(
-    layerAccountV2DefaultImpl.address
+    layerAccountDefaultImpl.address
   );
   let txSetDefaultImplementationDetails = await txSetDefaultImplementation.wait();
 
   const implementationV1Args: [string, BytesLike[]] = [
-    layerAccountV2ImplM1.address,
+    layerAccountImplM1.address,
     ["cast(string[],bytes[],address)"].map((a) =>
       web3.utils.keccak256(a).slice(0, 10)
     ),
@@ -107,62 +97,81 @@ async function main() {
       `);
   console.log("###########\n");
 
-  console.log("\n\n########### Add DSAv2 ########");
-  const addNewAccountArgs: [string, string, string] = [
-    layerAccountV2Proxy.address,
-    layerConnectorsV2Proxy.address,
-    ethers.constants.AddressZero,
-  ];
-  const txAddNewAccount = await layerIndex.addNewAccount(...addNewAccountArgs);
-  const txDetailsAddNewAccount = await txAddNewAccount.wait();
 
-  console.log(`
-          status: ${txDetailsAddNewAccount.status == 1},
-          tx: ${txDetailsAddNewAccount.transactionHash},
-      `);
-  console.log("###########\n");
+  if (hre.network.name === "arbitrum" || hre.network.name === "manta") {
 
-  if (hre.network.name === "mainnet" || hre.network.name === "kovan") {
     await hre.run("verify:verify", {
-      address: layerConnectorsV2Impl.address,
+      address: layerAccountImplM1.address,
+      constructorArguments: [layerIndex.address,layerConnectors.address],
+      contract:
+      "contracts/main/accounts/module1/Implementation_m1.sol:LayerImplementationM1",
+    });
+
+    await hre.run("verify:verify", {
+      address: layerEvent.address,
+      constructorArguments: [layerList.address],
+      contract:
+        "contracts/main/misc/event.sol:LayerEvent",
+    });
+
+    await hre.run("verify:verify", {
+      address: layerMemory.address,
       constructorArguments: [],
       contract:
-        "contracts/v2/proxy/dummyConnectorsImpl.sol:LayerConnectorsV2Impl",
+        "contracts/main/misc/memory.sol:LayerMemory",
     });
-    await hre.run("verify:verify", {
-      address: layerConnectorsV2Proxy.address,
-      constructorArguments: [
-        layerConnectorsV2Impl.address,
-        "0x9800020b610194dBa52CF606E8Aa142F9F256166",
-        "0x",
-      ],
-      contract: "contracts/v2/proxy/connectorsProxy.sol:LayerConnectorsV2Proxy",
-    });
-
-    await hre.run("verify:verify", {
-      address: layerConnectorsV2.address,
-      constructorArguments: [],
-    });
-
+   
     await hre.run("verify:verify", {
       address: implementationsMapping.address,
+      constructorArguments: [layerIndex.address],
+      contract:
+      "contracts/main/registry/implementations.sol:LayerImplementations",
+    });
+    
+    await hre.run("verify:verify", {
+      address: layerConnectorsImpl.address,
       constructorArguments: [],
+      contract:
+        "contracts/main/proxy/dummyConnectorsImpl.sol:LayerConnectorsImpl",
+    });
+
+
+    await hre.run("verify:verify", {
+      address: layerConnectors.address,
+      constructorArguments: [layerIndex.address],
+      contract:
+        "contracts/main/registry/connectors.sol:LayerConnectors",
     });
 
     await hre.run("verify:verify", {
-      address: layerAccountV2DefaultImpl.address,
+      address: layerConnectorsProxy.address,
+      constructorArguments: [layerConnectorsImpl.address,"0x5dBA78D25000c19E543E7f628eB42776b1498ff7","0x"],
+      contract:
+        "contracts/main/proxy/connectorsProxy.sol:LayerConnectorsProxy",
+    });
+
+    await hre.run("verify:verify", {
+      address: layerAccountDefaultImpl.address,
+      constructorArguments: [layerIndex.address],
+      contract:
+        "contracts/main/accounts/default/implementation_default.sol:LayerDefaultImplementation",
+    });
+
+  
+    await hre.run("verify:verify", {
+      address: layerIndex.address,
       constructorArguments: [],
+      contract:
+      "contracts/registry/index.sol:LayerIndex",
     });
 
     await hre.run("verify:verify", {
-      address: layerAccountV2ImplM1.address,
-      constructorArguments: [layerConnectorsV2.address],
+      address: layerList.address,
+      constructorArguments: [layerIndex.address],
+      contract:
+      "contracts/registry/list.sol:LayerList",
     });
 
-    await hre.run("verify:verify", {
-      address: layerAccountV2Proxy.address,
-      constructorArguments: [implementationsMapping.address],
-    });
   } else {
     console.log("Contracts deployed to", hre.network.name);
   }
