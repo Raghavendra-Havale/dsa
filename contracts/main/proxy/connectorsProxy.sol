@@ -16,8 +16,6 @@ contract LayerConnectorsProxy is TransparentUpgradeableProxy {
      * @param admin_ Address of the admin who can upgrade the proxy.
      * @param _data Data to be passed as msg.data to the logic contract for any initialization.
      */
-    constructor(address _logic, address admin_, bytes memory _data) 
-        public 
-        TransparentUpgradeableProxy(_logic, admin_, _data) 
+    constructor(address _logic, address admin_, bytes memory _data) TransparentUpgradeableProxy(_logic, admin_, _data) 
     {}
 }

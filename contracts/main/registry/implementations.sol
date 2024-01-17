@@ -85,7 +85,7 @@ contract Implementations is Setup {
 /// @title Contract for querying function implementations.
 contract LayerImplementations is Implementations {
     /// @param _layerIndex The address of the Index contract.
-    constructor(address _layerIndex) public Implementations(_layerIndex) {}
+    constructor(address _layerIndex) Implementations(_layerIndex) {}
 
     /// @notice Get the implementation address for a function signature.
     /// @param _sig The function signature to query.

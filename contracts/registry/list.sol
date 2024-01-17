@@ -3,45 +3,17 @@ pragma solidity ^0.8.0;
 
 /**
  * @title LayerList
- * @dev Registry for DeFi Smart Account authorized users.
+ * @dev Registry for Layer Smart Account authorized users.
  */
 interface AccountInterface {
     function isAuth(address _user) external view returns (bool);
 }
 
 /**
- * @title DSMath
- * @dev Library for basic arithmetic operations with overflow and underflow checks.
- */
-contract DSMath {
-
-    /**
-     * @dev Adds two numbers, reverts on overflow.
-     * @param x First operand.
-     * @param y Second operand.
-     * @return z Result of addition.
-     */
-    function add(uint64 x, uint64 y) internal pure returns (uint64 z) {
-        require((z = x + y) >= x, "ds-math-add-overflow");
-    }
-
-    /**
-     * @dev Subtracts two numbers, reverts on underflow.
-     * @param x First operand.
-     * @param y Second operand.
-     * @return z Result of subtraction.
-     */
-    function sub(uint64 x, uint64 y) internal pure returns (uint64 z) {
-        require((z = x - y) <= x, "ds-math-sub-underflow");
-    }
-
-}
-
-/**
  * @title Variables
  * @dev Contract to manage and store variables related to LayerList.
  */
-contract Variables is DSMath {
+contract Variables{
 
     // Address of the LayerIndex contract.
     address public immutable layerIndex;
@@ -50,16 +22,16 @@ contract Variables is DSMath {
         layerIndex = _layerIndex;
     }
 
-    // Total number of Smart Accounts.
+    // Total number of Layer Smart Accounts.
     uint64 public accounts;
     // Mapping from Smart Account address to its ID.
     mapping (address => uint64) public accountID;
     // Mapping from Smart Account ID to its address.
     mapping (uint64 => address) public accountAddr;
 
-    // Mapping from user address to its linked Smart Accounts.
+    // Mapping from user address to its linked Layer Smart Accounts.
     mapping (address => UserLink) public userLink;
-    // Linked list of Smart Accounts associated with a user.
+    // Linked list of Layer Smart Accounts associated with a user.
     mapping (address => mapping(uint64 => UserList)) public userList;
 
     struct UserLink {
@@ -72,9 +44,9 @@ contract Variables is DSMath {
         uint64 next;
     }
 
-    // Mapping from Smart Account ID to its linked owners.
+    // Mapping from Layer Smart Account ID to its linked owners.
     mapping (uint64 => AccountLink) public accountLink;
-    // Linked list of owners associated with a Smart Account.
+    // Linked list of owners associated with a Layer Smart Account.
     mapping (uint64 => mapping (address => AccountList)) public accountList;
 
     struct AccountLink {
@@ -98,9 +70,9 @@ contract Configure is Variables {
     constructor (address _layerIndex) Variables(_layerIndex) {}
 
     /**
-     * @dev Add a Smart Account to the linked list of a user.
+     * @dev Add a Layer Smart Account to the linked list of a user.
      * @param _owner Address of the user.
-     * @param _account ID of the Smart Account.
+     * @param _account ID of the Layer Smart Account.
      */
     function addAccount(address _owner, uint64 _account) internal {
         if (userLink[_owner].last != 0) {
@@ -109,13 +81,13 @@ contract Configure is Variables {
         }
         if (userLink[_owner].first == 0) userLink[_owner].first = _account;
         userLink[_owner].last = _account;
-        userLink[_owner].count = add(userLink[_owner].count, 1);
+        userLink[_owner].count =userLink[_owner].count + 1;
     }
 
     /**
-     * @dev Remove a Smart Account from the linked list of a user.
+     * @dev Remove a Layer Smart Account from the linked list of a user.
      * @param _owner Address of the user.
-     * @param _account ID of the Smart Account.
+     * @param _account ID of the Layer Smart Account.
      */
     function removeAccount(address _owner, uint64 _account) internal {
         uint64 _prev = userList[_owner][_account].prev;
@@ -124,14 +96,14 @@ contract Configure is Variables {
         if (_next != 0) userList[_owner][_next].prev = _prev;
         if (_prev == 0) userLink[_owner].first = _next;
         if (_next == 0) userLink[_owner].last = _prev;
-        userLink[_owner].count = sub(userLink[_owner].count, 1);
+        userLink[_owner].count = userLink[_owner].count - 1;
         delete userList[_owner][_account];
     }
 
     /**
-     * @dev Add a user to the linked list of a Smart Account.
+     * @dev Add a user to the linked list of a Layer Smart Account.
      * @param _owner Address of the user.
-     * @param _account ID of the Smart Account.
+     * @param _account ID of the Layer Smart Account.
      */
     function addUser(address _owner, uint64 _account) internal {
         if (accountLink[_account].last != address(0)) {
@@ -140,13 +112,13 @@ contract Configure is Variables {
         }
         if (accountLink[_account].first == address(0)) accountLink[_account].first = _owner;
         accountLink[_account].last = _owner;
-        accountLink[_account].count = add(accountLink[_account].count, 1);
+        accountLink[_account].count =accountLink[_account].count + 1;
     }
 
     /**
-     * @dev Remove a user from the linked list of a Smart Account.
+     * @dev Remove a user from the linked list of a Layer Smart Account.
      * @param _owner Address of the user.
-     * @param _account ID of the Smart Account.
+     * @param _account ID of the Layer Smart Account.
      */
     function removeUser(address _owner, uint64 _account) internal {
         address _prev = accountList[_account][_owner].prev;
@@ -155,7 +127,7 @@ contract Configure is Variables {
         if (_next != address(0)) accountList[_account][_next].prev = _prev;
         if (_prev == address(0)) accountLink[_account].first = _next;
         if (_next == address(0)) accountLink[_account].last = _prev;
-        accountLink[_account].count = sub(accountLink[_account].count, 1);
+        accountLink[_account].count =accountLink[_account].count - 1;
         delete accountList[_account][_owner];
     }
 
@@ -166,10 +138,10 @@ contract Configure is Variables {
  * @dev Main contract for managing and interacting with LayerList.
  */
 contract LayerList is Configure {
-    constructor (address _layerIndex) public Configure(_layerIndex) {}
+    constructor (address _layerIndex) Configure(_layerIndex) {}
 
     /**
-     * @dev Authorize a Smart Account for a user.
+     * @dev Authorize a Layer Smart Account for a user.
      * @param _owner Address of the user.
      */
     function addAuth(address _owner) external {
@@ -180,7 +152,7 @@ contract LayerList is Configure {
     }
 
     /**
-     * @dev Deauthorize a Smart Account for a user.
+     * @dev Deauthorize a Layer Smart Account for a user.
      * @param _owner Address of the user.
      */
     function removeAuth(address _owner) external {
@@ -191,8 +163,8 @@ contract LayerList is Configure {
     }
 
     /**
-     * @dev Initialize the configuration for a Smart Account.
-     * @param _account Address of the Smart Account.
+     * @dev Initialize the configuration for a Layer Smart Account.
+     * @param _account Address of the Layer Smart Account.
      */
     function init(address  _account) external {
         require(msg.sender == layerIndex, "not-index");

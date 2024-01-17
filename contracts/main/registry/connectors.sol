@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
-pragma experimental ABIEncoderV2;
 
 /**
  * @title LayerConnectors
@@ -83,7 +82,7 @@ contract LayerConnectors is Controllers {
         address indexed connector
     );
 
-    constructor(address _layerIndex) public Controllers(_layerIndex) {}
+    constructor(address _layerIndex) Controllers(_layerIndex) {}
 
     /**
      * @dev Adds new connectors to the registry.

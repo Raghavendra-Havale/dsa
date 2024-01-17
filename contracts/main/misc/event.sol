@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
 interface ListInterface {
@@ -9,7 +10,7 @@ contract LayerEvent {
 
     address public immutable layerList;
 
-    constructor (address _layerList) public {
+    constructor (address _layerList){
         layerList = _layerList;
     }
 

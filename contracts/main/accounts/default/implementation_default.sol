@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
-// pragma experimental ABIEncoderV2;
 
 import { Variables } from "../variables.sol";
 
@@ -31,7 +30,6 @@ contract Record is Constants {
 
     event LogEnableUser(address indexed user);
     event LogDisableUser(address indexed user);
-    event LogBetaMode(bool indexed beta);
 
     /**
      * @dev Check for Auth if enabled.
@@ -39,13 +37,6 @@ contract Record is Constants {
      */
     function isAuth(address user) public view returns (bool) {
         return _auth[user];
-    }
-
-    /**
-     * @dev Check if Beta mode is enabled or not
-     */
-    function isBeta() public view returns (bool) {
-        return _beta;
     }
 
     /**
@@ -75,12 +66,6 @@ contract Record is Constants {
         delete _auth[user];
         ListInterface(IndexInterface(layerIndex).list()).removeAuth(user);
         emit LogDisableUser(user);
-    }
-
-    function toggleBeta() public {
-        require(msg.sender == address(this), "not-self");
-        _beta = !_beta;
-        emit LogBetaMode(_beta);
     }
 
     /**
@@ -123,7 +108,7 @@ contract Record is Constants {
 }
 
 contract LayerDefaultImplementation is Record {
-    constructor(address _layerIndex) public Record(_layerIndex) {}
+    constructor(address _layerIndex) Record(_layerIndex) {}
 
     receive() external payable {}
 }

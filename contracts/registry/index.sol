@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
-// pragma experimental ABIEncoderV2;
 
 /**
  * @title LayerIndex
- * @dev Main Contract For DeFi Smart Accounts. This is also a factory contract, Which deploys new Smart Account.
- * Also Registry for DeFi Smart Accounts.
+ * @dev Main Contract For Layer Smart Accounts. This is also a factory contract, Which deploys new layer Smart Account.
+ * Also Registry for Layer Smart Accounts.
  */
 
 interface AccountInterface {
@@ -20,14 +19,13 @@ interface ListInterface {
 
 /**
  * @title AddressIndex
- * @dev Contract to manage master address, connectors, checks, and account versions.
+ * @dev Contract to manage master address, connectors and account versions.
  */
 contract AddressIndex {
 
     event LogNewMaster(address indexed master);
     event LogUpdateMaster(address indexed master);
-    event LogNewCheck(uint indexed accountVersion, address indexed check);
-    event LogNewAccount(address indexed _newAccount, address indexed _connectors, address indexed _check);
+    event LogNewAccount(address indexed _newAccount, address indexed _connectors);
 
     // New Master Address.
     address private newMaster;
@@ -38,8 +36,6 @@ contract AddressIndex {
 
     // Connectors Modules(Account Module Version => Connectors Registry Module Address).
     mapping (uint => address) public connectors;
-    // Check Modules(Account Module Version => Check Module Address).
-    mapping (uint => address) public check;
     // Account Modules(Account Module Version => Account Module Address).
     mapping (uint => address) public account;
     // Version Count of Account Modules.
@@ -76,31 +72,19 @@ contract AddressIndex {
         emit LogUpdateMaster(master);
     }
 
-    /**
-     * @dev Change the Check Address of a specific Account Module version.
-     * @param accountVersion Account Module version.
-     * @param _newCheck The New Check Address.
-     */
-    function changeCheck(uint accountVersion, address _newCheck) external isMaster {
-        require(_newCheck != check[accountVersion], "already-a-check");
-        check[accountVersion] = _newCheck;
-        emit LogNewCheck(accountVersion, _newCheck);
-    }
 
     /**
      * @dev Add New Account Module.
      * @param _newAccount The New Account Module Address.
      * @param _connectors Connectors Registry Module Address.
-     * @param _check Check Module Address.
      */
-    function addNewAccount(address _newAccount, address _connectors, address _check) external isMaster {
+    function addNewAccount(address _newAccount, address _connectors) external isMaster {
         require(_newAccount != address(0), "not-valid-address");
         versionCount++;
         require(AccountInterface(_newAccount).version() == versionCount, "not-valid-version");
         account[versionCount] = _newAccount;
         if (_connectors != address(0)) connectors[versionCount] = _connectors;
-        if (_check != address(0)) check[versionCount] = _check;
-        emit LogNewAccount(_newAccount, _connectors, _check);
+        emit LogNewAccount(_newAccount, _connectors);
     }
 
 }
@@ -152,19 +136,19 @@ contract CloneFactory is AddressIndex {
 
 /**
  * @title LayerIndex
- * @dev Main contract for creating and managing DeFi Smart Accounts.
+ * @dev Main contract for creating and managing Layer Smart Accounts.
  */
 contract LayerIndex is CloneFactory {
 
     event LogAccountCreated(address sender, address indexed owner, address indexed account, address indexed origin);
 
     /**
-     * @dev Create a new DeFi Smart Account for a user and run cast function in the new Smart Account.
-     * @param _owner Owner of the Smart Account.
+     * @dev Create a new Layer Smart Account for a user and run cast function in the new Smart Account.
+     * @param _owner Owner of the Layer Smart Account.
      * @param accountVersion Account Module version.
      * @param _targets Array of Target to run cast function.
      * @param _datas Array of Data(callData) to run cast function.
-     * @param _origin Where Smart Account is created.
+     * @param _origin Where Layer Smart Account is created.
      */
     function buildWithCast(
         address _owner,
@@ -178,10 +162,10 @@ contract LayerIndex is CloneFactory {
     }
 
     /**
-     * @dev Create a new DeFi Smart Account for a user.
-     * @param _owner Owner of the Smart Account.
+     * @dev Create a new Layer Smart Account for a user.
+     * @param _owner Owner of the Layer Smart Account.
      * @param accountVersion Account Module version.
-     * @param _origin Where Smart Account is created.
+     * @param _origin Where Layer Smart Account is created.
      */
     function build(
         address _owner,

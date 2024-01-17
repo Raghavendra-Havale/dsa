@@ -110,7 +110,6 @@ contract LayerImplementationBetaTest is Constants {
             bytes32 // Dummy return to fix layerIndex buildWithCast function
         )
     {
-        require(_beta, "Beta-does-not-enabled");
         uint256 _length = _targetNames.length;
         require(
             _auth[msg.sender] || msg.sender == layerIndex,

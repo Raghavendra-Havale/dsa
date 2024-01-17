@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
-// pragma experimental ABIEncoderV2;
 
 import { Variables } from "../variables.sol";
 
 /**
  * @title LayerAccount
- * @dev DeFi Smart Account Wallet.
+ * @dev Layer Smart Account Wallet.
  */
 
 interface ConnectorsInterface {
@@ -74,7 +73,7 @@ contract LayerImplementationM1 is Constants {
 
     /**
      * @dev This is the main function, Where all the different functions are called
-     * from Smart Account.
+     * from Layer Smart Account.
      * @param _targetNames Array of Connector address.
      * @param _datas Array of Calldata.
     */
