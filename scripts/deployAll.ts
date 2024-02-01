@@ -40,7 +40,7 @@ async function main() {
     "LayerConnectorsProxy",
     [
       layerConnectorsImpl.address,
-      "0x5dBA78D25000c19E543E7f628eB42776b1498ff7",
+      deployerAddress,
       "0x",
     ]
   );
@@ -75,11 +75,16 @@ async function main() {
         `);
   console.log("###########");
 
-  console.log("\n########### Add DSA Implementations ########");
+  console.log("\n########### Add LSA Implementations ########");
   let txSetDefaultImplementation = await implementationsMapping.setDefaultImplementation(
     layerAccountDefaultImpl.address
   );
   let txSetDefaultImplementationDetails = await txSetDefaultImplementation.wait();
+  console.log(`
+        status: ${txSetDefaultImplementationDetails.status == 1},
+        tx: ${txSetDefaultImplementationDetails.transactionHash},
+      `);
+  console.log("###########\n");
 
   const implementationV1Args: [string, BytesLike[]] = [
     layerAccountImplM1.address,
@@ -98,7 +103,7 @@ async function main() {
   console.log("###########\n");
 
 
-  if (hre.network.name === "arbitrum" || hre.network.name === "manta") {
+  if (hre.network.name === "arbitrum" || hre.network.name === "goerli") {
 
     await hre.run("verify:verify", {
       address: layerAccountImplM1.address,
@@ -145,7 +150,7 @@ async function main() {
 
     await hre.run("verify:verify", {
       address: layerConnectorsProxy.address,
-      constructorArguments: [layerConnectorsImpl.address,"0x5dBA78D25000c19E543E7f628eB42776b1498ff7","0x"],
+      constructorArguments: [layerConnectorsImpl.address,deployerAddress,"0x"],
       contract:
         "contracts/main/proxy/connectorsProxy.sol:LayerConnectorsProxy",
     });
