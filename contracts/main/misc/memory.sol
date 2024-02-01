@@ -8,11 +8,11 @@ pragma solidity ^0.8.0;
 
 contract LayerMemory {
 
-    // Memory Bytes (Smart Account Address => Storage ID => Bytes).
+    // Memory Bytes (Layer Smart Account Address => Storage ID => Bytes).
     mapping (address => mapping (uint => bytes32)) internal mbytes; // Use it to store execute data and delete in the same transaction
-    // Memory Uint (Smart Account Address => Storage ID => Uint).
+    // Memory Uint (Layer Smart Account Address => Storage ID => Uint).
     mapping (address => mapping (uint => uint)) internal muint; // Use it to store execute data and delete in the same transaction
-    // Memory Address (Smart Account Address => Storage ID => Address).
+    // Memory Address (Layer Smart Account Address => Storage ID => Address).
     mapping (address => mapping (uint => address)) internal maddr; // Use it to store execute data and delete in the same transaction
 
     /**

@@ -35,7 +35,7 @@ function getNetworkUrl(networkType: string) {
   else return `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_ID}`;
 }
 
-const INSTA_MASTER = "0x5A2d0610027bADBd47FD199a2C0Fe742A2315FAb";
+const LAYER_MASTER = "0xF5DD055ca5173406a06B39EF092c75dddE02d2bD";
 
 // ================================= CONFIG =========================================
 const config = {
@@ -47,7 +47,7 @@ const config = {
   },
   tenderly: {
     project: "team-development",
-    username: "InstaDApp",
+    username: "LayerDApp",
     forkNetwork: "1",
   },
   networks: {
@@ -57,7 +57,7 @@ const config = {
         blockNumber: 15010000,
       },
       blockGasLimit: 12000000,
-      masterAddress: INSTA_MASTER,
+      masterAddress: LAYER_MASTER,
     },
     goerli: {
       url: getNetworkUrl("goerli"),
@@ -95,7 +95,7 @@ const config = {
       {
         version: "0.8.0",
         settings: {
-          optimizer: { enabled: false },
+          optimizer: { enabled: true },
         },
       },
     ],
@@ -108,7 +108,7 @@ const config = {
   },
   etherscan: {
     apiKey:  {
-      manta: ETHERSCAN_API
+      goerli: ETHERSCAN_API
     },
     customChains: [
       {

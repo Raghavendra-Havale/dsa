@@ -9,7 +9,7 @@ interface AccountInterface {
     function isAuth(address _user) external view returns (bool);
 }
 
-/**
+/** 
  * @title Variables
  * @dev Contract to manage and store variables related to LayerList.
  */

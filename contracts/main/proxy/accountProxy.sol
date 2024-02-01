@@ -53,7 +53,7 @@ contract LayerAccount {
      */
     function _fallback(bytes4 _sig) internal {
         address _implementation = implementations.getImplementation(_sig);
-        require(_implementation != address(0), "LayerAccountV2: No implementation found for the given signature");
+        require(_implementation != address(0), "LayerAccount: No implementation found for the given signature");
         _delegate(_implementation);
     }
 
